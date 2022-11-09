@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get_it/Screens/HomePage/home.dart';
 import 'package:get_it/Screens/auth/SignupPage.dart';
 import 'package:get_it/Screens/auth/widgets/animatedButton.dart';
+import 'package:get_it/Screens/bttomNav.dart';
 import 'package:get_it/common/commonTextField.dart';
 
 class LoginPage extends StatefulWidget {
@@ -64,7 +65,7 @@ class _LoginPageState extends State<LoginPage> {
                 onPressed: () {
                   print("to Home Home page");
                   Navigator.push(context, MaterialPageRoute(builder: (context) {
-                    return HomePage();
+                    return bottomNav();
                   }));
                 },
                 child: SizedBox(
