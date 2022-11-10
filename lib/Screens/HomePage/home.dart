@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get_it/Screens/HomePage/HelpersScreen.dart';
 import 'package:get_it/Screens/HomePage/RequestScreen.dart';
 import 'package:get_it/Screens/HomePage/header.dart';
 
@@ -43,7 +44,7 @@ class _HomePageState extends State<HomePage> {
                           labelStyle: TextStyle(fontWeight: FontWeight.bold),
                           tabs: [
                             Tab(child: Text("Requests")),
-                            Tab(child: Text("Praposals")),
+                            Tab(child: Text("Helpers")),
                           ],
                         ),
                       ),
@@ -54,7 +55,7 @@ class _HomePageState extends State<HomePage> {
                 body: const TabBarView(
                   children: [
                     RequestScreen(),
-                    Text("Praposals"),
+                    HelpersScreen(),
                   ],
                 ),
               ),

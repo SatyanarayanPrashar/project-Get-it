@@ -20,7 +20,7 @@ class RequestDetailPage extends StatelessWidget {
         ),
       ),
       body: Padding(
-        padding: const EdgeInsets.only(left: 16, right: 16),
+        padding: const EdgeInsets.only(left: 16, right: 16, top: 11),
         child: Column(
           children: [
             Expanded(
@@ -115,6 +115,7 @@ class RequestDetailPage extends StatelessWidget {
                                                 //   return RequestDetailPage();
                                                 // }));
                                               },
+                                              outerColor: Color(0xffA6BBDE),
                                               submittedIcon: Icon(
                                                   Icons.handshake,
                                                   color: Colors.white),
