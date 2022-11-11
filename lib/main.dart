@@ -1,7 +1,9 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/Screens/HomePage/home.dart';
 import 'package:get_it/Screens/auth/LoginPage.dart';
+import 'package:get_it/Screens/bttomNav.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -23,7 +25,9 @@ class MyApp extends StatelessWidget {
         ),
       ),
       debugShowCheckedModeBanner: false,
-      home: LoginPage(),
+      home: (FirebaseAuth.instance.currentUser != null)
+          ? bottomNav()
+          : LoginPage(),
     );
   }
 }

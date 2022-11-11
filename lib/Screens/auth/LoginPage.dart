@@ -1,8 +1,11 @@
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/Screens/HomePage/home.dart';
 import 'package:get_it/Screens/auth/SignupPage.dart';
 import 'package:get_it/Screens/auth/widgets/animatedButton.dart';
 import 'package:get_it/Screens/bttomNav.dart';
+import 'package:get_it/common/actionmessage.dart';
 import 'package:get_it/common/commonTextField.dart';
 
 class LoginPage extends StatefulWidget {
@@ -13,11 +16,53 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
+  TextEditingController emailController = TextEditingController();
+  TextEditingController passwordController = TextEditingController();
+
+  void login() async {
+    String email = emailController.text.trim();
+    String password = passwordController.text.trim();
+
+    if (email == "" || password == "") {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Actionmessage(
+          message: 'Please fill all the details!',
+        ),
+        duration: Duration(seconds: 2),
+        behavior: SnackBarBehavior.floating,
+        elevation: 0,
+        backgroundColor: Colors.transparent,
+      ));
+    } else {
+      try {
+        UserCredential userCredential = await FirebaseAuth.instance
+            .signInWithEmailAndPassword(email: email, password: password);
+
+        if (userCredential != null) {
+          Navigator.popUntil(context, (route) => route.isFirst);
+          print("to Home Home page");
+          Navigator.pushReplacement(context,
+              MaterialPageRoute(builder: (context) {
+            return bottomNav();
+          }));
+        }
+      } on FirebaseAuthException catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Actionmessage(
+            message: e.code.toString(),
+          ),
+          duration: Duration(seconds: 2),
+          behavior: SnackBarBehavior.floating,
+          elevation: 0,
+          backgroundColor: Colors.transparent,
+        ));
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
-    TextEditingController emailController = TextEditingController();
-    TextEditingController passwordController = TextEditingController();
 
     return Scaffold(
       body: SingleChildScrollView(
@@ -63,10 +108,7 @@ class _LoginPageState extends State<LoginPage> {
               ),
               ElevatedButton(
                 onPressed: () {
-                  print("to Home Home page");
-                  Navigator.push(context, MaterialPageRoute(builder: (context) {
-                    return bottomNav();
-                  }));
+                  login();
                 },
                 child: SizedBox(
                   height: 45,

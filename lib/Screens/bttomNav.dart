@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:get_it/Screens/ChatsPage.dart';
 import 'package:get_it/Screens/HomePage/home.dart';
 import 'package:get_it/Screens/NotifiPage.dart';
-import 'package:get_it/Screens/ProfilePage.dart';
+import 'package:get_it/Screens/auth/SetProfilePage.dart';
+import 'package:get_it/Screens/profilescreens/ProfilePage.dart';
 
 class bottomNav extends StatefulWidget {
   const bottomNav({super.key});

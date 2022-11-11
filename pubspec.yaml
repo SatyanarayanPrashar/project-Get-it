@@ -41,6 +41,8 @@ dependencies:
   expandable_text: ^2.3.0
   slider_button: ^2.0.0
   slide_to_act: ^2.0.1
+  firebase_auth: ^3.11.2
+  cloud_firestore: ^3.5.1
 
   
 

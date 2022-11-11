@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:get_it/Screens/auth/OtpVerfPage.dart';
+import 'package:get_it/Screens/HomePage/home.dart';
+import 'package:get_it/Screens/auth/SetProfilePage.dart';
 import 'package:get_it/Screens/auth/widgets/animatedButton.dart';
+import 'package:get_it/Screens/bttomNav.dart';
+import 'package:get_it/common/actionmessage.dart';
 import 'package:get_it/common/commonTextField.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class SignupPage extends StatefulWidget {
   const SignupPage({super.key});
@@ -11,11 +15,64 @@ class SignupPage extends StatefulWidget {
 }
 
 class _SignupPageState extends State<SignupPage> {
+  TextEditingController emailController = TextEditingController();
+  TextEditingController passwordController = TextEditingController();
+  TextEditingController cpasswordController = TextEditingController();
+
+  void signup() async {
+    String email = emailController.text.trim();
+    String password = passwordController.text.trim();
+    String cpassword = cpasswordController.text.trim();
+
+    if (email == "" || password == "" || cpassword == "") {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Actionmessage(
+          message: 'Please fill all the details!',
+        ),
+        duration: Duration(seconds: 2),
+        behavior: SnackBarBehavior.floating,
+        elevation: 0,
+        backgroundColor: Colors.transparent,
+      ));
+    } else if (password != cpassword) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Actionmessage(
+          message: 'Passwords are not matching',
+        ),
+        duration: Duration(seconds: 2),
+        behavior: SnackBarBehavior.floating,
+        elevation: 0,
+        backgroundColor: Colors.transparent,
+      ));
+    } else {
+      try {
+        UserCredential userCredential = await FirebaseAuth.instance
+            .createUserWithEmailAndPassword(email: email, password: password);
+        if (userCredential.user != null) {
+          Navigator.popUntil(context, (route) => route.isFirst);
+
+          Navigator.pushReplacement(context,
+              MaterialPageRoute(builder: (context) {
+            return SetProfilePage();
+          }));
+        }
+      } on FirebaseAuthException catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Actionmessage(
+            message: e.code.toString(),
+          ),
+          duration: Duration(seconds: 2),
+          behavior: SnackBarBehavior.floating,
+          elevation: 0,
+          backgroundColor: Colors.transparent,
+        ));
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
-    TextEditingController emailController = TextEditingController();
-    TextEditingController passwordController = TextEditingController();
 
     return Scaffold(
       backgroundColor: Color(0xffFBFCFE),
@@ -60,17 +117,14 @@ class _SignupPageState extends State<SignupPage> {
                 ispassword: true,
               ),
               commonTextField(
-                inputcontroller: passwordController,
+                inputcontroller: cpasswordController,
                 title: "Confirm Password",
                 hint: "Reenter your password",
                 ispassword: true,
               ),
               ElevatedButton(
                 onPressed: () {
-                  print("to Home Home page");
-                  Navigator.push(context, MaterialPageRoute(builder: (context) {
-                    return OtpPage();
-                  }));
+                  signup();
                 },
                 child: SizedBox(
                   height: 45,

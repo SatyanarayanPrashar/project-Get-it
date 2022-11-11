@@ -14,10 +14,10 @@ class BottomSheetItems extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: Colors.white,
-      child: InkWell(
-        onTap: onTap,
+    return InkWell(
+      onTap: onTap,
+      child: Material(
+        color: Colors.white,
         child: Container(
           height: 44,
           padding: const EdgeInsets.symmetric(horizontal: 11),
