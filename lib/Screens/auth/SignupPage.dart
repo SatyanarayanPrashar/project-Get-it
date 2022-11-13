@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:get_it/Screens/HomePage/home.dart';
 import 'package:get_it/Screens/auth/SetProfilePage.dart';
 import 'package:get_it/Screens/auth/widgets/animatedButton.dart';
-import 'package:get_it/Screens/bttomNav.dart';
 import 'package:get_it/common/actionmessage.dart';
 import 'package:get_it/common/commonTextField.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:get_it/models/userModel.dart';
 
 class SignupPage extends StatefulWidget {
   const SignupPage({super.key});
@@ -53,7 +52,7 @@ class _SignupPageState extends State<SignupPage> {
 
           Navigator.pushReplacement(context,
               MaterialPageRoute(builder: (context) {
-            return SetProfilePage();
+            return SetProfilePage(email: email);
           }));
         }
       } on FirebaseAuthException catch (e) {
