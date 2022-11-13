@@ -41,24 +41,24 @@ class _SetProfilePageState extends State<SetProfilePage> {
       branch: branchController.text,
       idCard: "",
     );
-    FirebaseFirestore.instance
-        .collection("College")
-        .doc(collegevalue)
-        .collection("users")
-        .doc(uid)
-        .set(newUser.toMap())
-        .then((value) {
-      print("created a new profile");
-      FirebaseFirestore.instance
-          .collection("College")
-          .doc(collegevalue)
-          .update({"userCount": FieldValue.increment(1)});
-      Navigator.popUntil(context, (route) => route.isFirst);
+    // FirebaseFirestore.instance
+    //     .collection("College")
+    //     .doc(collegevalue)
+    //     .collection("users")
+    //     .doc(uid)
+    //     .set(newUser.toMap())
+    //     .then((value) {
+    //   print("created a new profile");
+    //   FirebaseFirestore.instance
+    //       .collection("College")
+    //       .doc(collegevalue)
+    //       .update({"userCount": FieldValue.increment(1)});
+    //   Navigator.popUntil(context, (route) => route.isFirst);
 
-      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) {
-        return bottomNav();
-      }));
-    });
+    //   Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) {
+    //     return bottomNav();
+    //   }));
+    // });
   }
 
   @override

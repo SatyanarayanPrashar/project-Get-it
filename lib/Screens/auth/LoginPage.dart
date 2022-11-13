@@ -1,6 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
 import 'package:get_it/Screens/HomePage/home.dart';
 import 'package:get_it/Screens/auth/SignupPage.dart';
 import 'package:get_it/Screens/auth/widgets/animatedButton.dart';
@@ -41,10 +43,7 @@ class _LoginPageState extends State<LoginPage> {
         if (userCredential != null) {
           Navigator.popUntil(context, (route) => route.isFirst);
           print("to Home Home page");
-          Navigator.pushReplacement(context,
-              MaterialPageRoute(builder: (context) {
-            return bottomNav();
-          }));
+          Get.to(bottomNav());
         }
       } on FirebaseAuthException catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
