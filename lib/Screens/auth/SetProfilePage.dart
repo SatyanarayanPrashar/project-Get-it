@@ -1,8 +1,15 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:get_it/Screens/bttomNav.dart';
 import 'package:get_it/common/commonTextField.dart';
+import 'package:get_it/models/userModel.dart';
 
 class SetProfilePage extends StatefulWidget {
-  SetProfilePage({super.key});
+  final String email;
+
+  const SetProfilePage({super.key, required this.email});
 
   @override
   State<SetProfilePage> createState() => _SetProfilePageState();
@@ -22,6 +29,37 @@ class _SetProfilePageState extends State<SetProfilePage> {
     'SMVIT, Bengaluru',
   ];
   var batches = ['2023', '2024', '2025', '2026'];
+
+  void createProfile() async {
+    String uid = FirebaseAuth.instance.currentUser!.uid;
+    UserModel newUser = UserModel(
+      uid: uid,
+      email: widget.email,
+      college: collegevalue,
+      fullname: nameController.text,
+      batch: batchvalue,
+      branch: branchController.text,
+      idCard: "",
+    );
+    FirebaseFirestore.instance
+        .collection("College")
+        .doc(collegevalue)
+        .collection("users")
+        .doc(uid)
+        .set(newUser.toMap())
+        .then((value) {
+      print("created a new profile");
+      FirebaseFirestore.instance
+          .collection("College")
+          .doc(collegevalue)
+          .update({"userCount": FieldValue.increment(1)});
+      Navigator.popUntil(context, (route) => route.isFirst);
+
+      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) {
+        return bottomNav();
+      }));
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -134,7 +172,7 @@ class _SetProfilePageState extends State<SetProfilePage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.only(top: 16),
+                padding: const EdgeInsets.only(top: 16, bottom: 16),
                 child: Container(
                   height: 37,
                   width: size.width,
@@ -150,6 +188,24 @@ class _SetProfilePageState extends State<SetProfilePage> {
                       child: Icon(
                         Icons.camera,
                         color: Colors.black.withOpacity(0.6),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  createProfile();
+                },
+                child: SizedBox(
+                  height: 45,
+                  width: size.width,
+                  child: const Center(
+                    child: Text(
+                      "Create Profile",
+                      style: TextStyle(
+                        fontSize: 17,
+                        letterSpacing: 1,
                       ),
                     ),
                   ),
