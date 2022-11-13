@@ -1,5 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-
 class UserModel {
   String? uid;
   String? fullname;
@@ -17,11 +15,6 @@ class UserModel {
       this.idCard,
       this.batch,
       this.branch});
-
-  UserModel.fromDocumentSnapshot{DocumentSnapshot doc} {
-    uid = doc.documentID;
-    fullname = doc["fullname"];
-  }
 
   UserModel.fromMap(Map<String, dynamic> map) {
     uid = map["uid"];

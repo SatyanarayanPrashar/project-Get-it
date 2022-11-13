@@ -1,7 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get_navigation/src/root/get_material_app.dart';
 import 'package:get_it/Screens/HomePage/home.dart';
 import 'package:get_it/Screens/auth/LoginPage.dart';
 import 'package:get_it/Screens/bttomNav.dart';
@@ -17,7 +16,7 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GetMaterialApp(
+    return MaterialApp(
       theme: ThemeData(
         scaffoldBackgroundColor: Color(0xffFBFCFE),
         appBarTheme: AppBarTheme(
