@@ -43,6 +43,7 @@ dependencies:
   slide_to_act: ^2.0.1
   firebase_auth: ^3.11.2
   cloud_firestore: ^3.5.1
+  shared_preferences: ^2.0.15
 
   
 

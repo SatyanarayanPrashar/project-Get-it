@@ -52,7 +52,10 @@ class _SignupPageState extends State<SignupPage> {
 
           Navigator.pushReplacement(context,
               MaterialPageRoute(builder: (context) {
-            return SetProfilePage(email: email);
+            return SetProfilePage(
+              email: email,
+              firebaseUser: userCredential.user!,
+            );
           }));
         }
       } on FirebaseAuthException catch (e) {

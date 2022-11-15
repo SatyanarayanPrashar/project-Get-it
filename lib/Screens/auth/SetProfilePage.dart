@@ -4,12 +4,15 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/Screens/bttomNav.dart';
 import 'package:get_it/common/commonTextField.dart';
+import 'package:get_it/models/localStorage.dart';
 import 'package:get_it/models/userModel.dart';
 
 class SetProfilePage extends StatefulWidget {
   final String email;
+  final User firebaseUser;
 
-  const SetProfilePage({super.key, required this.email});
+  const SetProfilePage(
+      {super.key, required this.email, required this.firebaseUser});
 
   @override
   State<SetProfilePage> createState() => _SetProfilePageState();
@@ -21,8 +24,8 @@ class _SetProfilePageState extends State<SetProfilePage> {
   TextEditingController branchController = TextEditingController();
   TextEditingController batchController = TextEditingController();
 
-  String collegevalue = 'NMIT, Bengaluru';
-  String batchvalue = '2023';
+  String collegevalue = "";
+  String batchvalue = "";
 
   var colleges = [
     'NMIT, Bengaluru',
@@ -48,7 +51,8 @@ class _SetProfilePageState extends State<SetProfilePage> {
         .doc(uid)
         .set(newUser.toMap())
         .then((value) {
-      print("created a new profile");
+      LocalStorage.saveCollege(collegevalue);
+
       FirebaseFirestore.instance
           .collection("College")
           .doc(collegevalue)
@@ -56,7 +60,7 @@ class _SetProfilePageState extends State<SetProfilePage> {
       Navigator.popUntil(context, (route) => route.isFirst);
 
       Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) {
-        return bottomNav();
+        return bottomNav(firebaseUser: widget.firebaseUser, userModel: newUser);
       }));
     });
   }
@@ -111,7 +115,9 @@ class _SetProfilePageState extends State<SetProfilePage> {
                   const Spacer(),
                   DropdownButton(
                     icon: const Icon(Icons.keyboard_arrow_down),
-                    hint: Text("Select your college"),
+                    hint: collegevalue == ""
+                        ? Text("Select your college")
+                        : Text(collegevalue),
                     menuMaxHeight: size.height * 0.2,
                     isDense: true,
                     items: colleges.map((String items) {
@@ -146,7 +152,9 @@ class _SetProfilePageState extends State<SetProfilePage> {
                   const Spacer(),
                   DropdownButton(
                     icon: const Icon(Icons.keyboard_arrow_down),
-                    hint: Text("Select your batch"),
+                    hint: batchvalue == ""
+                        ? Text("Select your batch")
+                        : Text(batchvalue),
                     menuMaxHeight: size.height * 0.2,
                     isDense: true,
                     items: batches.map((String items) {

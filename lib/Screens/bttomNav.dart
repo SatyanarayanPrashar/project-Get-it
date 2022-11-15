@@ -1,12 +1,17 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/Screens/ChatsPage.dart';
 import 'package:get_it/Screens/HomePage/home.dart';
 import 'package:get_it/Screens/NotifiPage.dart';
-import 'package:get_it/Screens/auth/SetProfilePage.dart';
 import 'package:get_it/Screens/profilescreens/ProfilePage.dart';
+import 'package:get_it/models/userModel.dart';
 
 class bottomNav extends StatefulWidget {
-  const bottomNav({super.key});
+  final UserModel userModel;
+  final User firebaseUser;
+
+  const bottomNav(
+      {super.key, required this.userModel, required this.firebaseUser});
 
   @override
   State<bottomNav> createState() => _bottomNavState();

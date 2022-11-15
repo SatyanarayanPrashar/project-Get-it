@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -7,6 +8,8 @@ import 'package:get_it/Screens/auth/widgets/animatedButton.dart';
 import 'package:get_it/Screens/bttomNav.dart';
 import 'package:get_it/common/actionmessage.dart';
 import 'package:get_it/common/commonTextField.dart';
+import 'package:get_it/models/localStorage.dart';
+import 'package:get_it/models/userModel.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -19,11 +22,17 @@ class _LoginPageState extends State<LoginPage> {
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
 
+  String collegevalue = "";
+  var colleges = [
+    'NMIT, Bengaluru',
+    'SMVIT, Bengaluru',
+  ];
+
   void login() async {
     String email = emailController.text.trim();
     String password = passwordController.text.trim();
 
-    if (email == "" || password == "") {
+    if (email == "" || password == "" || collegevalue == "") {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Actionmessage(
           message: 'Please fill all the details!',
@@ -34,18 +43,26 @@ class _LoginPageState extends State<LoginPage> {
         backgroundColor: Colors.transparent,
       ));
     } else {
+      LocalStorage.saveCollege(collegevalue);
       try {
-        UserCredential userCredential = await FirebaseAuth.instance
+        UserCredential credential = await FirebaseAuth.instance
             .signInWithEmailAndPassword(email: email, password: password);
 
-        if (userCredential != null) {
-          Navigator.popUntil(context, (route) => route.isFirst);
-          print("to Home Home page");
-          Navigator.pushReplacement(context,
-              MaterialPageRoute(builder: (context) {
-            return bottomNav();
-          }));
-        }
+        String uid = credential.user!.uid;
+
+        DocumentSnapshot userData = await FirebaseFirestore.instance
+            .collection("College")
+            .doc(collegevalue)
+            .collection("users")
+            .doc(uid)
+            .get();
+        UserModel userModel =
+            UserModel.fromMap(userData.data() as Map<String, dynamic>);
+
+        Navigator.push(context, MaterialPageRoute(builder: (context) {
+          return bottomNav(
+              userModel: userModel, firebaseUser: credential.user!);
+        }));
       } on FirebaseAuthException catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: Actionmessage(
@@ -99,6 +116,39 @@ class _LoginPageState extends State<LoginPage> {
                 inputcontroller: emailController,
                 title: "Email",
                 hint: "Enter your email",
+              ),
+              Padding(
+                padding: const EdgeInsets.only(bottom: 16),
+                child: Row(
+                  children: [
+                    const Text(
+                      "College",
+                      style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          color: Color(0xff385585)),
+                    ),
+                    const Spacer(),
+                    DropdownButton(
+                      icon: const Icon(Icons.keyboard_arrow_down),
+                      hint: collegevalue == ""
+                          ? Text("Select your college")
+                          : Text(collegevalue),
+                      menuMaxHeight: size.height * 0.2,
+                      isDense: true,
+                      items: colleges.map((String items) {
+                        return DropdownMenuItem(
+                          value: items,
+                          child: Text(items),
+                        );
+                      }).toList(),
+                      onChanged: (String? newValue) {
+                        setState(() {
+                          collegevalue = newValue!;
+                        });
+                      },
+                    ),
+                  ],
+                ),
               ),
               commonTextField(
                 inputcontroller: passwordController,
