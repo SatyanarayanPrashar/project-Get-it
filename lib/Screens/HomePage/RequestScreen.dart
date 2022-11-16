@@ -1,14 +1,51 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:expandable_text/expandable_text.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/Screens/insiderScreens/RequestDetailsPage.dart';
 import 'package:get_it/Screens/insiderScreens/RequestFormPage.dart';
 import 'package:get_it/common/bottomSheet.dart';
 import 'package:get_it/common/bottomsheetItem.dart';
+import 'package:get_it/models/requestModel.dart';
+import 'package:get_it/models/userModel.dart';
 import 'package:slide_to_act/slide_to_act.dart';
-import 'package:slider_button/slider_button.dart';
+import 'package:timeago/timeago.dart' as timeago;
 
-class RequestScreen extends StatelessWidget {
-  const RequestScreen({super.key});
+class RequestScreen extends StatefulWidget {
+  RequestScreen(
+      {super.key, required this.userModel, required this.isOnHomepage});
+  final UserModel userModel;
+  final bool isOnHomepage;
+
+  @override
+  State<RequestScreen> createState() => _RequestScreenState();
+}
+
+class _RequestScreenState extends State<RequestScreen> {
+  late Future<QuerySnapshot> requestList;
+
+  @override
+  void initState() {
+    super.initState();
+    requestList = fetchRequests();
+  }
+
+  Future<QuerySnapshot> fetchRequests() async {
+    final QuerySnapshot data = widget.isOnHomepage
+        ? await FirebaseFirestore.instance
+            .collection("College")
+            .doc(widget.userModel.college)
+            .collection("requests")
+            .orderBy("requestedOn", descending: true)
+            .get()
+        : await FirebaseFirestore.instance
+            .collection("College")
+            .doc(widget.userModel.college)
+            .collection("requests")
+            .where("requestedby", isEqualTo: widget.userModel.fullname)
+            .get();
+
+    return data;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -16,18 +53,72 @@ class RequestScreen extends StatelessWidget {
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           Navigator.push(context, MaterialPageRoute(builder: (context) {
-            return RequestForm();
+            return RequestForm(userModel: widget.userModel);
           }));
         },
         backgroundColor: Colors.blue,
-        child: Icon(Icons.add),
+        child: const Icon(Icons.add),
       ),
       body: Padding(
         padding: const EdgeInsets.only(left: 16, right: 16),
-        child: ListView.builder(
-          physics: BouncingScrollPhysics(),
-          itemCount: 10,
-          itemBuilder: (context, index) => RequestTile(isUserPost: false),
+        child: FutureBuilder<QuerySnapshot>(
+          future: requestList,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.done) {
+              if (snapshot.hasData) {
+                QuerySnapshot requestSnapshot = snapshot.data as QuerySnapshot;
+                return RefreshIndicator(
+                  onRefresh: () async {
+                    setState(() {
+                      requestList = fetchRequests();
+                    });
+                  },
+                  child: ListView.builder(
+                    itemCount: requestSnapshot.docs.length,
+                    itemBuilder: (context, index) {
+                      RequestModel currentRequest = RequestModel.fromMap(
+                          requestSnapshot.docs[index].data()
+                              as Map<String, dynamic>);
+
+                      return Column(
+                        children: [
+                          RequestTile(
+                            requestedby: currentRequest.requestedBy,
+                            note: currentRequest.note,
+                            one: currentRequest.one,
+                            oneQuantity: currentRequest.oneQuantity,
+                            two: currentRequest.two,
+                            twoQuantity: currentRequest.twoQuantity,
+                            three: currentRequest.three,
+                            threeQuantity: currentRequest.threeQuantity,
+                            getitBy: currentRequest.getby,
+                            price: currentRequest.price,
+                            requestedon:
+                                currentRequest.requestedOn ?? DateTime.now(),
+                          ),
+                          index == requestSnapshot.docs.length - 1
+                              ? Text("No more requests avialable")
+                              : Container(),
+                        ],
+                      );
+                    },
+                  ),
+                );
+              } else if (snapshot.hasError) {
+                return const Center(
+                  child: Text("somthing went wrong :("),
+                );
+              } else {
+                return const Center(
+                  child: Text("YOu have not requested anything yet:("),
+                );
+              }
+            } else {
+              return const Center(
+                child: CircularProgressIndicator(),
+              );
+            }
+          },
         ),
       ),
     );
@@ -36,8 +127,32 @@ class RequestScreen extends StatelessWidget {
 
 class RequestTile extends StatefulWidget {
   final bool? isUserPost;
+  final String? requestedby;
+  final DateTime requestedon;
+  final String? one;
+  final String? oneQuantity;
+  final String? two;
+  final String? twoQuantity;
+  final String? three;
+  final String? threeQuantity;
+  final String? getitBy;
+  final String? price;
+  final String? note;
 
-  const RequestTile({super.key, this.isUserPost});
+  const RequestTile(
+      {super.key,
+      this.isUserPost,
+      this.requestedby,
+      required this.requestedon,
+      this.one,
+      this.oneQuantity,
+      this.two,
+      this.twoQuantity,
+      this.three,
+      this.threeQuantity,
+      this.getitBy,
+      this.price,
+      this.note});
 
   @override
   State<RequestTile> createState() => _RequestTileState();
@@ -71,17 +186,19 @@ class _RequestTileState extends State<RequestTile> {
                 ),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: const [
+                  children: [
                     Text(
-                      "Anupam",
-                      style: TextStyle(
+                      widget.requestedby ?? "NA :(",
+                      style: const TextStyle(
                         fontWeight: FontWeight.w500,
                         fontSize: 14,
                       ),
                     ),
                     Text(
-                      "18 minutes ago",
-                      style: TextStyle(
+                      widget.requestedon != null
+                          ? timeago.format(widget.requestedon)
+                          : "NA :(",
+                      style: const TextStyle(
                         color: Colors.grey,
                         fontSize: 9,
                       ),
@@ -131,25 +248,28 @@ class _RequestTileState extends State<RequestTile> {
                 )
               ],
             ),
-            Padding(
-              padding: const EdgeInsets.only(top: 7),
-              child: ExpandableText(
-                "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam lobortis dignissim tortor. Nunc a suscipit libero. Aliquam convallis tellus sit amet rutrum tristique Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit..",
-                style: TextStyle(fontSize: 14),
-                expandText: "more",
-                collapseText: "show less",
-                maxLines: 2,
-                linkColor: Colors.black.withOpacity(0.3),
-                linkStyle: TextStyle(decoration: TextDecoration.underline),
-              ),
-            ),
+            widget.note != ""
+                ? Padding(
+                    padding: const EdgeInsets.only(top: 7),
+                    child: ExpandableText(
+                      widget.note ?? "",
+                      style: const TextStyle(fontSize: 14),
+                      expandText: "more",
+                      collapseText: "show less",
+                      maxLines: 2,
+                      linkColor: Colors.black.withOpacity(0.3),
+                      linkStyle:
+                          const TextStyle(decoration: TextDecoration.underline),
+                    ),
+                  )
+                : Container(),
             Container(
               margin: EdgeInsets.only(top: 11, bottom: 11),
               child: Row(
                 children: [
                   Flexible(
                     child: Container(
-                      height: 107,
+                      // height: 107,
                       width: size.width * 0.57,
                       decoration: BoxDecoration(
                         color: Color(0xffA6BBDE).withOpacity(0.2),
@@ -157,30 +277,63 @@ class _RequestTileState extends State<RequestTile> {
                         borderRadius: BorderRadius.circular(14),
                       ),
                       alignment: Alignment.center,
-                      child: Center(
-                        child: ListView.builder(
-                          physics: NeverScrollableScrollPhysics(),
-                          itemCount: 2,
-                          itemBuilder: (context, index) {
-                            return Container(
-                              padding: EdgeInsets.all(7),
-                              margin: EdgeInsets.only(bottom: 4),
-                              child: Row(
-                                children: [
-                                  Text("Apple"),
-                                  Spacer(),
-                                  Text("1 kg"),
-                                ],
-                              ),
-                            );
-                          },
-                        ),
+                      child: Column(
+                        children: [
+                          Container(
+                            padding: EdgeInsets.all(7),
+                            margin: EdgeInsets.only(bottom: 4),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Expanded(
+                                  child: Container(
+                                    child: Text(widget.one ?? "",
+                                        overflow: TextOverflow.clip),
+                                  ),
+                                ),
+                                Text(widget.oneQuantity ?? ""),
+                              ],
+                            ),
+                          ),
+                          Container(
+                            padding: EdgeInsets.all(7),
+                            margin: EdgeInsets.only(bottom: 4),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Expanded(
+                                  child: Container(
+                                    child: Text(widget.two ?? "",
+                                        overflow: TextOverflow.clip),
+                                  ),
+                                ),
+                                Text(widget.twoQuantity ?? ""),
+                              ],
+                            ),
+                          ),
+                          Container(
+                            padding: const EdgeInsets.all(7),
+                            margin: const EdgeInsets.only(bottom: 4),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Expanded(
+                                  child: Container(
+                                    child: Text(widget.three ?? "",
+                                        overflow: TextOverflow.clip),
+                                  ),
+                                ),
+                                // Spacer(),
+                                Text(widget.threeQuantity ?? ""),
+                              ],
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
                   Expanded(
                     child: Container(
-                      height: 107,
                       child: Column(
                         children: [
                           Container(
@@ -195,23 +348,13 @@ class _RequestTileState extends State<RequestTile> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Row(
-                                  children: [
-                                    Text(
-                                      "GetiT by: ",
-                                      style: TextStyle(fontSize: 11),
-                                    ),
-                                    Text("11 December"),
-                                  ],
+                                Text(
+                                  "GetiT by: ${widget.getitBy ?? ""}",
+                                  style: TextStyle(fontSize: 11),
                                 ),
-                                Row(
-                                  children: [
-                                    Text(
-                                      "Price: ",
-                                      style: TextStyle(fontSize: 11),
-                                    ),
-                                    Text("200"),
-                                  ],
+                                Text(
+                                  "Price: ${widget.price ?? ""}",
+                                  style: TextStyle(fontSize: 11),
                                 ),
                               ],
                             ),
@@ -246,7 +389,7 @@ class _RequestTileState extends State<RequestTile> {
                 ],
               ),
             ),
-            Divider(
+            const Divider(
               color: Color(0xffEAEAEA),
               thickness: 1,
             ),

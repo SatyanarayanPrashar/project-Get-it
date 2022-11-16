@@ -8,7 +8,7 @@ import 'package:get_it/models/userModel.dart';
 
 class bottomNav extends StatefulWidget {
   final UserModel userModel;
-  final User firebaseUser;
+  final User? firebaseUser;
 
   const bottomNav(
       {super.key, required this.userModel, required this.firebaseUser});
@@ -18,15 +18,18 @@ class bottomNav extends StatefulWidget {
 }
 
 class _bottomNavState extends State<bottomNav> {
+  @override
   int index = 0;
-  final screens = [
-    HomePage(),
+  late List<Widget> screens = [
+    HomePage(
+      userModel: widget.userModel,
+    ),
     ChatPage(),
     NotifPage(),
-    ProfilePage(),
+    ProfilePage(
+      userModel: widget.userModel,
+    ),
   ];
-
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
       bottomNavigationBar: BottomNavigationBar(

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:get_it/models/userModel.dart';
 
 class RequestHeader extends StatelessWidget {
-  const RequestHeader({super.key});
+  const RequestHeader({super.key, required this.userModel});
+  final UserModel userModel;
 
   @override
   Widget build(BuildContext context) {
@@ -12,7 +14,12 @@ class RequestHeader extends StatelessWidget {
       color: Colors.white,
       child: Stack(
         children: [
-          Positioned(left: 0, top: 20, child: CollegeFlag()),
+          Positioned(
+              left: 0,
+              top: 20,
+              child: CollegeFlag(
+                collegeName: userModel.college,
+              )),
           Positioned(
             left: 50,
             bottom: 0,
@@ -59,9 +66,8 @@ class RequestHeader extends StatelessWidget {
 }
 
 class CollegeFlag extends StatefulWidget {
-  const CollegeFlag({
-    super.key,
-  });
+  const CollegeFlag({super.key, this.collegeName});
+  final String? collegeName;
 
   @override
   State<CollegeFlag> createState() => _CollegeFlagState();
@@ -106,10 +112,10 @@ class _CollegeFlagState extends State<CollegeFlag>
     Size size = MediaQuery.of(context).size;
     return Container(
       width: size.width * 0.43,
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         boxShadow: [
           BoxShadow(
-            color: Color(0xff17056EAC),
+            color: Color(0xff17056eac),
             blurRadius: 10,
             spreadRadius: 3,
             offset: Offset(0, 4),
@@ -136,7 +142,7 @@ class _CollegeFlagState extends State<CollegeFlag>
                     padding: const EdgeInsets.only(left: 7, right: 7),
                     child: Center(
                       child: Text(
-                        "NMIT, Bengaluru",
+                        widget.collegeName ?? "",
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
                             fontSize: 13.7,

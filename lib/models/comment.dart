@@ -1,15 +1,15 @@
-class RequestModel {
+class CommentModel {
   String? commentBy;
   DateTime? commentedOn;
   String? note;
 
-  RequestModel({
+  CommentModel({
     this.commentBy,
     this.commentedOn,
     this.note,
   });
 
-  RequestModel.fromMap(Map<String, dynamic> map) {
+  CommentModel.fromMap(Map<String, dynamic> map) {
     commentBy = map["commentby"];
     commentedOn = map["commentedOn"];
     note = map["note"];

@@ -44,6 +44,7 @@ dependencies:
   firebase_auth: ^3.11.2
   cloud_firestore: ^3.5.1
   shared_preferences: ^2.0.15
+  timeago: ^3.3.0
 
   
 

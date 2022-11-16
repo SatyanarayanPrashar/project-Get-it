@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:get_it/Screens/HomePage/HelpersScreen.dart';
 import 'package:get_it/Screens/HomePage/RequestScreen.dart';
 import 'package:get_it/Screens/profilescreens/profileHeader.dart';
+import 'package:get_it/models/userModel.dart';
 
 class ProfilePage extends StatelessWidget {
-  const ProfilePage({super.key});
+  const ProfilePage({super.key, required this.userModel});
+  final UserModel userModel;
 
   @override
   Widget build(BuildContext context) {
@@ -27,7 +29,7 @@ class ProfilePage extends StatelessWidget {
                       collapsedHeight: 0,
                       expandedHeight: size.height * 0.2,
                       toolbarHeight: 0,
-                      flexibleSpace: profileHeader(),
+                      flexibleSpace: profileHeader(userModel: userModel),
                     ),
                     SliverPersistentHeader(
                       delegate: _SliverAppBarDelegate(
@@ -47,9 +49,9 @@ class ProfilePage extends StatelessWidget {
                     ),
                   ];
                 },
-                body: const TabBarView(
+                body: TabBarView(
                   children: [
-                    RequestScreen(),
+                    RequestScreen(userModel: userModel, isOnHomepage: false),
                     HelpersScreen(),
                   ],
                 ),

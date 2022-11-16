@@ -5,21 +5,24 @@ import 'package:get_it/Screens/auth/LoginPage.dart';
 import 'package:get_it/common/bottomSheet.dart';
 import 'package:get_it/common/bottomsheetItem.dart';
 import 'package:get_it/common/custom_confirmation_dialog.dart';
+import 'package:get_it/models/userModel.dart';
 
 class profileHeader extends StatelessWidget {
-  const profileHeader({super.key});
+  final UserModel userModel;
+  const profileHeader({super.key, required this.userModel});
 
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
 
     void logout() async {
-      await FirebaseAuth.instance.signOut();
-      Navigator.popUntil(context, (route) => route.isFirst);
-      print("to Home Home page");
-      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) {
-        return LoginPage();
-      }));
+      await FirebaseAuth.instance.signOut().then((value) {
+        Navigator.popUntil(context, (route) => route.isFirst);
+        Navigator.pushReplacement(context,
+            MaterialPageRoute(builder: (context) {
+          return LoginPage();
+        }));
+      });
     }
 
     return Container(
@@ -65,7 +68,7 @@ class profileHeader extends StatelessWidget {
                     ),
                   );
                 },
-                icon: Icon(Icons.menu_rounded)),
+                icon: const Icon(Icons.menu_rounded)),
           ),
           Positioned(
             top: 30,
@@ -76,7 +79,7 @@ class profileHeader extends StatelessWidget {
                   children: [
                     CircleAvatar(
                       backgroundImage:
-                          AssetImage("assets/Images/praposalHome.png"),
+                          const AssetImage("assets/Images/praposalHome.png"),
                       radius: size.width * 0.1,
                     ),
                     SizedBox(
@@ -88,20 +91,23 @@ class profileHeader extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              "Satyanarayan Prashar",
+                              userModel.fullname ?? "NA",
                               overflow: TextOverflow.clip,
-                              style: TextStyle(
+                              style: const TextStyle(
                                   fontSize: 17, fontWeight: FontWeight.w600),
                             ),
                             Row(
                               children: [
-                                Text(
-                                  "ECE ",
-                                  style: TextStyle(fontSize: 14),
+                                Padding(
+                                  padding: const EdgeInsets.only(right: 7),
+                                  child: Text(
+                                    userModel.branch ?? "NA",
+                                    style: const TextStyle(fontSize: 14),
+                                  ),
                                 ),
                                 Text(
-                                  "2025",
-                                  style: TextStyle(fontSize: 14),
+                                  userModel.batch ?? "NA",
+                                  style: const TextStyle(fontSize: 14),
                                 ),
                               ],
                             ),
@@ -117,7 +123,7 @@ class profileHeader extends StatelessWidget {
                                   color: Colors.blue,
                                   borderRadius: BorderRadius.circular(12),
                                 ),
-                                child: Center(
+                                child: const Center(
                                     child: Text(
                                   "Edit",
                                   style: TextStyle(color: Colors.white),
@@ -133,7 +139,8 @@ class profileHeader extends StatelessWidget {
               ],
             ),
           ),
-          Positioned(bottom: 10, child: CollegeFlag()),
+          Positioned(
+              bottom: 10, child: CollegeFlag(collegeName: userModel.college)),
         ],
       ),
     );

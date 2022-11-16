@@ -27,8 +27,9 @@ class Actionmessage extends StatelessWidget {
           children: [
             Text(
               message,
+              overflow: TextOverflow.clip,
               style: TextStyle(
-                  fontSize: 16,
+                  fontSize: 14,
                   fontWeight: FontWeight.w500,
                   color: Colors.black.withOpacity(0.7)),
             ),

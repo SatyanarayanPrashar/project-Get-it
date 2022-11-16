@@ -1,24 +1,121 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:get_it/Screens/bttomNav.dart';
+import 'package:get_it/common/actionmessage.dart';
 import 'package:get_it/common/commonTextField.dart';
+import 'package:get_it/models/requestModel.dart';
+import 'package:get_it/models/userModel.dart';
 
-class RequestForm extends StatelessWidget {
-  const RequestForm({super.key});
+class RequestForm extends StatefulWidget {
+  const RequestForm({super.key, required this.userModel});
+  final UserModel userModel;
 
+  @override
+  State<RequestForm> createState() => _RequestFormState();
+}
+
+class _RequestFormState extends State<RequestForm> {
+  TextEditingController getitBycontroller = TextEditingController();
+  TextEditingController pricecontroller = TextEditingController();
+  TextEditingController notecontroller = TextEditingController();
+
+  TextEditingController onecontroller = TextEditingController();
+  TextEditingController onequantitycontroller = TextEditingController();
+
+  TextEditingController twocontroller = TextEditingController();
+  TextEditingController twoQuantitycontroller = TextEditingController();
+
+  TextEditingController threecontroller = TextEditingController();
+  TextEditingController threequantitycontroller = TextEditingController();
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
-    TextEditingController getitBycontroller = TextEditingController();
-    TextEditingController pricecontroller = TextEditingController();
-    TextEditingController notecontroller = TextEditingController();
 
-    TextEditingController onecontroller = TextEditingController();
-    TextEditingController onequantitycontroller = TextEditingController();
+    void createRequest() async {
+      if (getitBycontroller.text.isNotEmpty) {
+        if (onecontroller.text.isNotEmpty) {
+          if (onequantitycontroller.text.isNotEmpty) {
+            if (pricecontroller.text.isNotEmpty) {
+              RequestModel newRequest = RequestModel(
+                  getby: getitBycontroller.text,
+                  requestedBy: widget.userModel.fullname,
+                  requesterUid: widget.userModel.uid,
+                  requestedOn: DateTime.now(),
+                  price: pricecontroller.text,
+                  note: notecontroller.text.trim(),
+                  one: onecontroller.text.trim(),
+                  two: twocontroller.text.trim(),
+                  three: threecontroller.text.trim(),
+                  oneQuantity: onequantitycontroller.text.trim(),
+                  twoQuantity: twoQuantitycontroller.text.trim(),
+                  threeQuantity: threequantitycontroller.text.trim(),
+                  status: "pending");
+              FirebaseFirestore.instance
+                  .collection("College")
+                  .doc(widget.userModel.college)
+                  .collection("requests")
+                  .doc(widget.userModel.fullname! + DateTime.now().toString())
+                  .set(newRequest.toMap())
+                  .then((value) {
+                FirebaseFirestore.instance
+                    .collection("College")
+                    .doc(widget.userModel.college)
+                    .update({"requestCount": FieldValue.increment(1)});
 
-    TextEditingController twocontroller = TextEditingController();
-    TextEditingController twoQuantitycontroller = TextEditingController();
-
-    TextEditingController threecontroller = TextEditingController();
-    TextEditingController threequantitycontroller = TextEditingController();
+                Navigator.pushReplacement(context,
+                    MaterialPageRoute(builder: (context) {
+                  return bottomNav(
+                    userModel: widget.userModel,
+                    firebaseUser: null,
+                  );
+                }));
+              });
+            } else {
+              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                content: Actionmessage(
+                  message: 'Please enter the price you can offer!',
+                ),
+                duration: Duration(seconds: 2),
+                behavior: SnackBarBehavior.floating,
+                elevation: 0,
+                backgroundColor: Colors.transparent,
+              ));
+            }
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+              content: Actionmessage(
+                message: 'Please enter item ones quantity!',
+              ),
+              duration: Duration(seconds: 2),
+              behavior: SnackBarBehavior.floating,
+              elevation: 0,
+              backgroundColor: Colors.transparent,
+            ));
+          }
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+            content: Actionmessage(
+              message: 'Please enter the item 1!',
+            ),
+            duration: Duration(seconds: 2),
+            behavior: SnackBarBehavior.floating,
+            elevation: 0,
+            backgroundColor: Colors.transparent,
+          ));
+        }
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Actionmessage(
+            message: 'Please enter get it by!',
+          ),
+          duration: Duration(seconds: 2),
+          behavior: SnackBarBehavior.floating,
+          elevation: 0,
+          backgroundColor: Colors.transparent,
+        ));
+      }
+    }
 
     return Scaffold(
       appBar: AppBar(
@@ -125,7 +222,7 @@ class RequestForm extends StatelessWidget {
               ),
               InkWell(
                 onTap: () {
-                  //
+                  createRequest();
                 },
                 child: Container(
                   width: size.width,

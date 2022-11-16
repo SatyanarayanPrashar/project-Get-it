@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:get_it/Screens/HomePage/HelpersScreen.dart';
 import 'package:get_it/Screens/HomePage/RequestScreen.dart';
 import 'package:get_it/Screens/HomePage/header.dart';
+import 'package:get_it/models/userModel.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+  const HomePage({super.key, required this.userModel});
+  final UserModel userModel;
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -32,7 +34,9 @@ class _HomePageState extends State<HomePage> {
                       collapsedHeight: 0,
                       expandedHeight: size.height * 0.2,
                       toolbarHeight: 0,
-                      flexibleSpace: RequestHeader(),
+                      flexibleSpace: RequestHeader(
+                        userModel: widget.userModel,
+                      ),
                     ),
                     SliverPersistentHeader(
                       delegate: _SliverAppBarDelegate(
@@ -52,9 +56,12 @@ class _HomePageState extends State<HomePage> {
                     ),
                   ];
                 },
-                body: const TabBarView(
+                body: TabBarView(
                   children: [
-                    RequestScreen(),
+                    RequestScreen(
+                      userModel: widget.userModel,
+                      isOnHomepage: true,
+                    ),
                     HelpersScreen(),
                   ],
                 ),

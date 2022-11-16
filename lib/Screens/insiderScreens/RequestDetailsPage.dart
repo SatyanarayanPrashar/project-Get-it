@@ -28,7 +28,9 @@ class RequestDetailPage extends StatelessWidget {
                 itemCount: 3,
                 itemBuilder: (context, index) {
                   return index == 0
-                      ? RequestTile()
+                      ? RequestTile(
+                          requestedon: DateTime.now(),
+                        )
                       : Container(
                           margin: EdgeInsets.only(bottom: 7),
                           width: size.width,

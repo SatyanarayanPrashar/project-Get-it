@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/Screens/HomePage/home.dart';
+import 'package:get_it/Screens/auth/LoginPage.dart';
 import 'package:get_it/Screens/auth/SignupPage.dart';
 import 'package:get_it/Screens/auth/widgets/animatedButton.dart';
 import 'package:get_it/common/commonTextField.dart';
@@ -105,7 +106,7 @@ class _OtpPageState extends State<OtpPage> {
                 onPressed: () {
                   print("to Home Home page");
                   Navigator.push(context, MaterialPageRoute(builder: (context) {
-                    return HomePage();
+                    return LoginPage();
                   }));
                 },
                 child: SizedBox(
