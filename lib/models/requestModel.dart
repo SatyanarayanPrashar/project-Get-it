@@ -1,4 +1,5 @@
 class RequestModel {
+  String? requestUid;
   String? requestedBy;
   String? requesterUid;
   DateTime? requestedOn;
@@ -14,7 +15,8 @@ class RequestModel {
   String? status;
 
   RequestModel(
-      {this.requestedBy,
+      {this.requestUid,
+      this.requestedBy,
       this.requesterUid,
       this.requestedOn,
       this.note,
@@ -29,6 +31,7 @@ class RequestModel {
       this.status});
 
   RequestModel.fromMap(Map<String, dynamic> map) {
+    requestUid = map["requestUid"];
     requestedBy = map["requestedby"];
     requesterUid = map["requestedUid"];
     requestedOn = map["requestedOn"].toDate();
@@ -46,6 +49,7 @@ class RequestModel {
 
   Map<String, dynamic> toMap() {
     return {
+      "requestUid": requestUid,
       "requestedby": requestedBy,
       "requesterUid": requesterUid,
       "requestedOn": requestedOn,

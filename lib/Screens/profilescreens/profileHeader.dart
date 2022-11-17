@@ -44,7 +44,6 @@ class profileHeader extends StatelessWidget {
                           ? [
                               BottomSheetItems(
                                 onTap: () {
-                                  print("object");
                                   showConfirmationDialog(
                                       context: context,
                                       message:

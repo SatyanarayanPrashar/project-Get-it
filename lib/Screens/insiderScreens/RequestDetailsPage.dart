@@ -1,11 +1,15 @@
 import 'package:expandable_text/expandable_text.dart';
 import 'package:flutter/material.dart';
-import 'package:get_it/Screens/HomePage/RequestScreen.dart';
+import 'package:get_it/Screens/HomePage/requestTile.dart';
+import 'package:get_it/models/requestModel.dart';
+import 'package:get_it/models/userModel.dart';
 import 'package:slide_to_act/slide_to_act.dart';
-import 'package:slider_button/slider_button.dart';
 
 class RequestDetailPage extends StatelessWidget {
-  const RequestDetailPage({super.key});
+  const RequestDetailPage(
+      {super.key, required this.requestModel, this.isUserPost});
+  final RequestModel requestModel;
+  final bool? isUserPost;
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +33,20 @@ class RequestDetailPage extends StatelessWidget {
                 itemBuilder: (context, index) {
                   return index == 0
                       ? RequestTile(
-                          requestedon: DateTime.now(),
+                          requestUid: requestModel.requestUid,
+                          isUserPost: isUserPost,
+                          requestedby: requestModel.requestedBy,
+                          note: requestModel.note,
+                          one: requestModel.one,
+                          oneQuantity: requestModel.oneQuantity,
+                          two: requestModel.two,
+                          twoQuantity: requestModel.twoQuantity,
+                          three: requestModel.three,
+                          threeQuantity: requestModel.threeQuantity,
+                          getitBy: requestModel.getby,
+                          price: requestModel.price,
+                          requestedon:
+                              requestModel.requestedOn ?? DateTime.now(),
                         )
                       : Container(
                           margin: EdgeInsets.only(bottom: 7),

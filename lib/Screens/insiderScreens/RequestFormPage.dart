@@ -7,6 +7,8 @@ import 'package:get_it/common/commonTextField.dart';
 import 'package:get_it/models/requestModel.dart';
 import 'package:get_it/models/userModel.dart';
 
+import '../../main.dart';
+
 class RequestForm extends StatefulWidget {
   const RequestForm({super.key, required this.userModel});
   final UserModel userModel;
@@ -33,11 +35,14 @@ class _RequestFormState extends State<RequestForm> {
     Size size = MediaQuery.of(context).size;
 
     void createRequest() async {
+      String requestUid = uuid.v1();
+
       if (getitBycontroller.text.isNotEmpty) {
         if (onecontroller.text.isNotEmpty) {
           if (onequantitycontroller.text.isNotEmpty) {
             if (pricecontroller.text.isNotEmpty) {
               RequestModel newRequest = RequestModel(
+                  requestUid: requestUid,
                   getby: getitBycontroller.text,
                   requestedBy: widget.userModel.fullname,
                   requesterUid: widget.userModel.uid,
@@ -55,7 +60,7 @@ class _RequestFormState extends State<RequestForm> {
                   .collection("College")
                   .doc(widget.userModel.college)
                   .collection("requests")
-                  .doc(widget.userModel.fullname! + DateTime.now().toString())
+                  .doc(requestUid)
                   .set(newRequest.toMap())
                   .then((value) {
                 FirebaseFirestore.instance

@@ -26,11 +26,10 @@ class BottomSheetItems extends StatelessWidget {
               Text(
                 title,
                 style: TextStyle(
-                  color: title == "Block" ||
-                          title == "Delete" ||
-                          title == "Log Out"
-                      ? Colors.red
-                      : color ?? Theme.of(context).iconTheme.color,
+                  color:
+                      title == "Block" || title == "Delete" || title == "Logout"
+                          ? Colors.red
+                          : color ?? Theme.of(context).iconTheme.color,
                   fontSize: 16,
                 ),
               ),
