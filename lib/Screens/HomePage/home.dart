@@ -62,7 +62,9 @@ class _HomePageState extends State<HomePage> {
                       userModel: widget.userModel,
                       isOnHomepage: true,
                     ),
-                    HelpersScreen(),
+                    HelpersScreen(
+                      userModel: widget.userModel,
+                    ),
                   ],
                 ),
               ),

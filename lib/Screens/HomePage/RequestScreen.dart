@@ -94,7 +94,7 @@ class _RequestScreenState extends State<RequestScreen> {
                             requestedon:
                                 currentRequest.requestedOn ?? DateTime.now(),
                             refresh: () {
-                              print("refresh presed");
+                              print("refresh pressed");
                               setState(() {
                                 print("refresh in process");
                                 requestList = fetchRequests();

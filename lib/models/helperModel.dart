@@ -1,25 +1,37 @@
-class RequestModel {
+class HelperModel {
   String? helpBy;
-  DateTime? helpOn;
+  String? helperUid;
+  String? helpUid;
+  String? helpOn;
   String? note;
+  DateTime? requestedOn;
 
-  RequestModel({
+  HelperModel({
     this.helpBy,
+    this.helperUid,
+    this.helpUid,
     this.helpOn,
     this.note,
+    this.requestedOn,
   });
 
-  RequestModel.fromMap(Map<String, dynamic> map) {
+  HelperModel.fromMap(Map<String, dynamic> map) {
     helpBy = map["helpby"];
+    helperUid = map["helperUid"];
+    helpUid = map["helpUid"];
     helpOn = map["helpOn"];
     note = map["note"];
+    requestedOn = map["requestedOn"].toDate();
   }
 
   Map<String, dynamic> toMap() {
     return {
       "helpby": helpBy,
+      "helperUid": helperUid,
+      "helpUid": helpUid,
       "helpOn": helpOn,
       "note": note,
+      "requestedOn": requestedOn,
     };
   }
 }

@@ -52,7 +52,9 @@ class ProfilePage extends StatelessWidget {
                 body: TabBarView(
                   children: [
                     RequestScreen(userModel: userModel, isOnHomepage: false),
-                    HelpersScreen(),
+                    HelpersScreen(
+                      userModel: userModel,
+                    ),
                   ],
                 ),
               ),

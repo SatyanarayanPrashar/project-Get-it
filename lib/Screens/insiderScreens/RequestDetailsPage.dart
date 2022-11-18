@@ -2,7 +2,6 @@ import 'package:expandable_text/expandable_text.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/Screens/HomePage/requestTile.dart';
 import 'package:get_it/models/requestModel.dart';
-import 'package:get_it/models/userModel.dart';
 import 'package:slide_to_act/slide_to_act.dart';
 
 class RequestDetailPage extends StatelessWidget {

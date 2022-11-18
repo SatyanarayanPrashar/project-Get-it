@@ -1,15 +1,54 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:get_it/Screens/bttomNav.dart';
 import 'package:get_it/common/commonTextField.dart';
+import 'package:get_it/main.dart';
+import 'package:get_it/models/helperModel.dart';
+import 'package:get_it/models/userModel.dart';
 
-class HelperFormPage extends StatelessWidget {
-  const HelperFormPage({super.key});
+class HelperFormPage extends StatefulWidget {
+  const HelperFormPage({super.key, required this.userModel});
+  final UserModel userModel;
+
+  @override
+  State<HelperFormPage> createState() => _HelperFormPageState();
+}
+
+class _HelperFormPageState extends State<HelperFormPage> {
+  TextEditingController notecontroller = TextEditingController();
+  TextEditingController availablecontroller = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
 
-    TextEditingController notecontroller = TextEditingController();
-    TextEditingController availablecontroller = TextEditingController();
+    void createHelper() async {
+      String helpUid = uuid.v1();
+
+      if (availablecontroller.text.isNotEmpty) {
+        HelperModel newhelper = HelperModel(
+          helpBy: widget.userModel.fullname,
+          helperUid: widget.userModel.uid,
+          helpUid: helpUid,
+          helpOn: availablecontroller.text,
+          note: notecontroller.text,
+          requestedOn: DateTime.now(),
+        );
+        FirebaseFirestore.instance
+            .collection("College")
+            .doc(widget.userModel.college)
+            .collection("helpers")
+            .doc(helpUid)
+            .set(newhelper.toMap());
+        Navigator.pushReplacement(context,
+            MaterialPageRoute(builder: (context) {
+          return bottomNav(
+            userModel: widget.userModel,
+            firebaseUser: null,
+          );
+        }));
+      }
+    }
 
     return Scaffold(
       appBar: AppBar(
@@ -42,6 +81,7 @@ class HelperFormPage extends StatelessWidget {
               InkWell(
                 onTap: () {
                   //
+                  createHelper();
                 },
                 child: Container(
                   width: size.width,
