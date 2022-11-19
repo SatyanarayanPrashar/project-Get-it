@@ -78,6 +78,7 @@ class _RequestScreenState extends State<RequestScreen> {
                       return Column(
                         children: [
                           RequestTile(
+                            isOnHome: true,
                             requestUid: currentRequest.requestUid,
                             isUserPost: currentRequest.requestedBy ==
                                 widget.userModel.fullname,
@@ -101,6 +102,7 @@ class _RequestScreenState extends State<RequestScreen> {
                                 print("refreshed");
                               });
                             },
+                            loggedUserModel: widget.userModel,
                           ),
                           index == requestSnapshot.docs.length - 1
                               ? const Padding(

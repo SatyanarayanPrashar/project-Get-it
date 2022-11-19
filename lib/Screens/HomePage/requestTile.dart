@@ -2,9 +2,13 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:expandable_text/expandable_text.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/Screens/insiderScreens/RequestDetailsPage.dart';
+import 'package:get_it/common/actionmessage.dart';
 import 'package:get_it/common/bottomSheet.dart';
 import 'package:get_it/common/bottomsheetItem.dart';
+import 'package:get_it/common/commonTextField.dart';
 import 'package:get_it/common/custom_confirmation_dialog.dart';
+import 'package:get_it/main.dart';
+import 'package:get_it/models/comment.dart';
 import 'package:get_it/models/localStorage.dart';
 import 'package:get_it/models/requestModel.dart';
 import 'package:get_it/models/userModel.dart';
@@ -13,6 +17,7 @@ import 'package:timeago/timeago.dart' as timeago;
 
 class RequestTile extends StatefulWidget {
   final bool? isUserPost;
+  final bool? isOnHome;
   final String? requestedby;
   final DateTime requestedon;
   final String? one;
@@ -25,11 +30,11 @@ class RequestTile extends StatefulWidget {
   final String? price;
   final String? note;
   final String? requestUid;
+  final UserModel loggedUserModel;
   final void Function()? refresh;
 
-  const RequestTile(
+  RequestTile(
       {super.key,
-      this.isUserPost,
       this.requestedby,
       required this.requestedon,
       this.one,
@@ -42,7 +47,10 @@ class RequestTile extends StatefulWidget {
       this.price,
       this.note,
       this.requestUid,
-      this.refresh});
+      this.refresh,
+      this.isUserPost,
+      this.isOnHome,
+      required this.loggedUserModel});
 
   @override
   State<RequestTile> createState() => _RequestTileState();
@@ -50,6 +58,9 @@ class RequestTile extends StatefulWidget {
 
 class _RequestTileState extends State<RequestTile> {
   UserModel? thisUserModel;
+  bool isHelpPressed = false;
+  TextEditingController timeController = TextEditingController();
+  TextEditingController noteController = TextEditingController();
 
   void deleteRequest() async {
     String? currentCollege = await LocalStorage.getCollege();
@@ -63,6 +74,47 @@ class _RequestTileState extends State<RequestTile> {
       Navigator.pop(context);
       widget.refresh;
     });
+  }
+
+  void createhelp() async {
+    String? currentCollege = await LocalStorage.getCollege();
+    String commentId = uuid.v1();
+
+    if (timeController.text.isNotEmpty) {
+      CommentModel newComment = CommentModel(
+        commentBy: widget.loggedUserModel.fullname,
+        timing: timeController.text,
+        helperId: widget.loggedUserModel.uid,
+        note: noteController.text,
+        commentedOn: DateTime.now(),
+        commentId: commentId,
+      );
+      FirebaseFirestore.instance
+          .collection("College")
+          .doc(currentCollege)
+          .collection("requests")
+          .doc(widget.requestUid)
+          .collection("comments")
+          .doc(commentId)
+          .set(newComment.toMap())
+          .then((value) {
+        setState(() {
+          isHelpPressed = false;
+        });
+      });
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Actionmessage(
+            message: 'Please enter the timming!',
+          ),
+          duration: Duration(seconds: 2),
+          behavior: SnackBarBehavior.floating,
+          elevation: 0,
+          backgroundColor: Colors.transparent,
+        ),
+      );
+    }
   }
 
   void toDetails() async {
@@ -81,6 +133,7 @@ class _RequestTileState extends State<RequestTile> {
       return RequestDetailPage(
         requestModel: requestModel,
         isUserPost: widget.isUserPost,
+        loggedUserModel: widget.loggedUserModel,
       );
     }));
   }
@@ -91,7 +144,7 @@ class _RequestTileState extends State<RequestTile> {
 
     return InkWell(
       onTap: () {
-        toDetails();
+        (widget.isOnHome ?? true) ? toDetails() : null;
       },
       child: Container(
         width: size.width,
@@ -295,34 +348,58 @@ class _RequestTileState extends State<RequestTile> {
                           Container(
                             margin: EdgeInsets.fromLTRB(11, 7, 0, 0),
                             width: size.width * 0.57,
-                            child: widget.isUserPost ?? false
-                                ? InkWell(
-                                    onTap: () {
-                                      toDetails();
-                                    },
-                                    child: Container(
-                                      height: 50,
-                                      decoration: BoxDecoration(
-                                        color: Colors.blue,
-                                        borderRadius: BorderRadius.circular(27),
-                                      ),
-                                      child: const Center(
-                                          child: Text(
-                                        "View",
-                                        style: TextStyle(color: Colors.white),
-                                      )),
-                                    ),
-                                  )
+                            child: (widget.isUserPost ?? false)
+                                ? (widget.isOnHome ?? false)
+                                    ? InkWell(
+                                        onTap: () {
+                                          toDetails();
+                                        },
+                                        child: Container(
+                                          height: 50,
+                                          decoration: BoxDecoration(
+                                            color: Colors.blue,
+                                            borderRadius:
+                                                BorderRadius.circular(27),
+                                          ),
+                                          child: const Center(
+                                              child: Text(
+                                            "View",
+                                            style:
+                                                TextStyle(color: Colors.white),
+                                          )),
+                                        ),
+                                      )
+                                    : InkWell(
+                                        onTap: () {
+                                          // toDetails();
+                                        },
+                                        child: Container(
+                                          height: 50,
+                                          decoration: BoxDecoration(
+                                            color: Colors.blue,
+                                            borderRadius:
+                                                BorderRadius.circular(27),
+                                          ),
+                                          child: const Center(
+                                            child: Text(
+                                              "Edit",
+                                              style: TextStyle(
+                                                  color: Colors.white),
+                                            ),
+                                          ),
+                                        ),
+                                      )
                                 : SlideAction(
                                     onSubmit: () {
-                                      //
-                                      toDetails();
+                                      setState(() {
+                                        isHelpPressed = true;
+                                      });
                                     },
                                     outerColor: Colors.blue,
                                     submittedIcon: const Icon(Icons.handshake,
                                         color: Colors.white),
                                     animationDuration:
-                                        Duration(milliseconds: 170),
+                                        const Duration(milliseconds: 170),
                                     height: 50,
                                     sliderButtonIconSize: 17,
                                     sliderButtonIconPadding: 11,
@@ -343,6 +420,65 @@ class _RequestTileState extends State<RequestTile> {
               color: Color(0xffEAEAEA),
               thickness: 1,
             ),
+            isHelpPressed
+                ? Row(
+                    children: [
+                      Flexible(
+                        flex: 2,
+                        child: SizedBox(
+                          // width: size.width,
+                          child: Column(
+                            children: [
+                              commonTextField(
+                                inputcontroller: timeController,
+                                title: "Timing*",
+                                hint: "Enter time",
+                                enableToolTip: true,
+                                tiptool:
+                                    "Enter the time at which you can hand over the item :D",
+                              ),
+                              commonTextField(
+                                inputcontroller: noteController,
+                                title: "Note",
+                                hint: "Add a note",
+                                enableToolTip: true,
+                                tiptool: "You can add a note for the helper :D",
+                              )
+                            ],
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            ElevatedButton(
+                              onPressed: () {
+                                createhelp();
+                                setState(() {});
+                              },
+                              child: const Text("  Save  "),
+                            ),
+                            ElevatedButton(
+                              onPressed: () {
+                                setState(() {
+                                  isHelpPressed = false;
+                                });
+                              },
+                              child: const Text(" Cancel "),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  )
+                : Container(),
+            isHelpPressed
+                ? const Divider(
+                    color: Color(0xffEAEAEA),
+                    thickness: 1,
+                  )
+                : Container(),
           ],
         ),
       ),
