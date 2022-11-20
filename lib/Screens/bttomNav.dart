@@ -1,6 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:get_it/Screens/ChatsPage.dart';
+import 'package:get_it/Screens/chat/ChatsPage.dart';
 import 'package:get_it/Screens/HomePage/home.dart';
 import 'package:get_it/Screens/NotifiPage.dart';
 import 'package:get_it/Screens/profilescreens/ProfilePage.dart';
@@ -8,7 +8,7 @@ import 'package:get_it/models/userModel.dart';
 
 class bottomNav extends StatefulWidget {
   final UserModel userModel;
-  final User? firebaseUser;
+  final User firebaseUser;
 
   const bottomNav(
       {super.key, required this.userModel, required this.firebaseUser});
@@ -23,11 +23,17 @@ class _bottomNavState extends State<bottomNav> {
   late List<Widget> screens = [
     HomePage(
       userModel: widget.userModel,
+      firebaseUser: widget.firebaseUser,
     ),
-    ChatPage(),
+    // ChatPage(
+    //   chatroom: null,
+
+    // ),
+    NotifPage(),
     NotifPage(),
     ProfilePage(
       userModel: widget.userModel,
+      firebaseUser: widget.firebaseUser,
     ),
   ];
   Widget build(BuildContext context) {
