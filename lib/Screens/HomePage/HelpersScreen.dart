@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:expandable_text/expandable_text.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/Screens/insiderScreens/HelperForm.dart';
 import 'package:get_it/models/helperModel.dart';
@@ -8,8 +9,10 @@ import 'package:get_it/models/userModel.dart';
 import 'package:slide_to_act/slide_to_act.dart';
 
 class HelpersScreen extends StatefulWidget {
-  const HelpersScreen({super.key, required this.userModel});
+  const HelpersScreen(
+      {super.key, required this.userModel, required this.firebaseUser});
   final UserModel userModel;
+  final User firebaseUser;
 
   @override
   State<HelpersScreen> createState() => _HelpersScreenState();
@@ -39,7 +42,10 @@ class _HelpersScreenState extends State<HelpersScreen> {
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           Navigator.push(context, MaterialPageRoute(builder: (context) {
-            return HelperFormPage(userModel: widget.userModel);
+            return HelperFormPage(
+              userModel: widget.userModel,
+              firebaseUser: widget.firebaseUser,
+            );
           }));
         },
         backgroundColor: Colors.blue,

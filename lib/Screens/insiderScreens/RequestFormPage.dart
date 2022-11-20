@@ -10,8 +10,10 @@ import 'package:get_it/models/userModel.dart';
 import '../../main.dart';
 
 class RequestForm extends StatefulWidget {
-  const RequestForm({super.key, required this.userModel});
+  const RequestForm(
+      {super.key, required this.userModel, required this.firebaseUser});
   final UserModel userModel;
+  final User firebaseUser;
 
   @override
   State<RequestForm> createState() => _RequestFormState();
@@ -72,7 +74,7 @@ class _RequestFormState extends State<RequestForm> {
                     MaterialPageRoute(builder: (context) {
                   return bottomNav(
                     userModel: widget.userModel,
-                    firebaseUser: null,
+                    firebaseUser: widget.firebaseUser,
                   );
                 }));
               });

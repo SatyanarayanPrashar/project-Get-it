@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:expandable_text/expandable_text.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/Screens/insiderScreens/RequestDetailsPage.dart';
 import 'package:get_it/common/actionmessage.dart';
@@ -31,26 +32,29 @@ class RequestTile extends StatefulWidget {
   final String? note;
   final String? requestUid;
   final UserModel loggedUserModel;
+  final User firebaseUser;
   final void Function()? refresh;
 
-  RequestTile(
-      {super.key,
-      this.requestedby,
-      required this.requestedon,
-      this.one,
-      this.oneQuantity,
-      this.two,
-      this.twoQuantity,
-      this.three,
-      this.threeQuantity,
-      this.getitBy,
-      this.price,
-      this.note,
-      this.requestUid,
-      this.refresh,
-      this.isUserPost,
-      this.isOnHome,
-      required this.loggedUserModel});
+  RequestTile({
+    super.key,
+    this.requestedby,
+    required this.requestedon,
+    this.one,
+    this.oneQuantity,
+    this.two,
+    this.twoQuantity,
+    this.three,
+    this.threeQuantity,
+    this.getitBy,
+    this.price,
+    this.note,
+    this.requestUid,
+    this.refresh,
+    this.isUserPost,
+    this.isOnHome,
+    required this.loggedUserModel,
+    required this.firebaseUser,
+  });
 
   @override
   State<RequestTile> createState() => _RequestTileState();
@@ -76,7 +80,7 @@ class _RequestTileState extends State<RequestTile> {
     });
   }
 
-  void createhelp() async {
+  void createComment() async {
     String? currentCollege = await LocalStorage.getCollege();
     String commentId = uuid.v1();
 
@@ -134,6 +138,7 @@ class _RequestTileState extends State<RequestTile> {
         requestModel: requestModel,
         isUserPost: widget.isUserPost,
         loggedUserModel: widget.loggedUserModel,
+        firebaseUser: widget.firebaseUser,
       );
     }));
   }
@@ -454,7 +459,7 @@ class _RequestTileState extends State<RequestTile> {
                           children: [
                             ElevatedButton(
                               onPressed: () {
-                                createhelp();
+                                createComment();
                                 setState(() {});
                               },
                               child: const Text("  Save  "),

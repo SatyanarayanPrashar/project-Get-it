@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/Screens/HomePage/HelpersScreen.dart';
 import 'package:get_it/Screens/HomePage/RequestScreen.dart';
@@ -5,8 +6,10 @@ import 'package:get_it/Screens/profilescreens/profileHeader.dart';
 import 'package:get_it/models/userModel.dart';
 
 class ProfilePage extends StatelessWidget {
-  const ProfilePage({super.key, required this.userModel});
+  const ProfilePage(
+      {super.key, required this.userModel, required this.firebaseUser});
   final UserModel userModel;
+  final User firebaseUser;
 
   @override
   Widget build(BuildContext context) {
@@ -51,9 +54,14 @@ class ProfilePage extends StatelessWidget {
                 },
                 body: TabBarView(
                   children: [
-                    RequestScreen(userModel: userModel, isOnHomepage: false),
+                    RequestScreen(
+                      userModel: userModel,
+                      isOnHomepage: false,
+                      firebaseUser: firebaseUser,
+                    ),
                     HelpersScreen(
                       userModel: userModel,
+                      firebaseUser: firebaseUser,
                     ),
                   ],
                 ),

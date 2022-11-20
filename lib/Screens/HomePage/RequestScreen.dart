@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/Screens/HomePage/requestTile.dart';
 import 'package:get_it/Screens/insiderScreens/RequestFormPage.dart';
@@ -7,9 +8,13 @@ import 'package:get_it/models/userModel.dart';
 
 class RequestScreen extends StatefulWidget {
   RequestScreen(
-      {super.key, required this.userModel, required this.isOnHomepage});
+      {super.key,
+      required this.userModel,
+      required this.isOnHomepage,
+      required this.firebaseUser});
   final UserModel userModel;
   final bool isOnHomepage;
+  final User firebaseUser;
 
   @override
   State<RequestScreen> createState() => _RequestScreenState();
@@ -48,7 +53,10 @@ class _RequestScreenState extends State<RequestScreen> {
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           Navigator.push(context, MaterialPageRoute(builder: (context) {
-            return RequestForm(userModel: widget.userModel);
+            return RequestForm(
+              userModel: widget.userModel,
+              firebaseUser: widget.firebaseUser,
+            );
           }));
         },
         backgroundColor: Colors.blue,
@@ -103,6 +111,7 @@ class _RequestScreenState extends State<RequestScreen> {
                               });
                             },
                             loggedUserModel: widget.userModel,
+                            firebaseUser: widget.firebaseUser,
                           ),
                           index == requestSnapshot.docs.length - 1
                               ? const Padding(

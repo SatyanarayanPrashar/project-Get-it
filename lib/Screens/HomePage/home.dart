@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/Screens/HomePage/HelpersScreen.dart';
 import 'package:get_it/Screens/HomePage/RequestScreen.dart';
@@ -5,8 +6,10 @@ import 'package:get_it/Screens/HomePage/header.dart';
 import 'package:get_it/models/userModel.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({super.key, required this.userModel});
+  const HomePage(
+      {super.key, required this.userModel, required this.firebaseUser});
   final UserModel userModel;
+  final User firebaseUser;
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -61,9 +64,11 @@ class _HomePageState extends State<HomePage> {
                     RequestScreen(
                       userModel: widget.userModel,
                       isOnHomepage: true,
+                      firebaseUser: widget.firebaseUser,
                     ),
                     HelpersScreen(
                       userModel: widget.userModel,
+                      firebaseUser: widget.firebaseUser,
                     ),
                   ],
                 ),

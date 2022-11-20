@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/Screens/bttomNav.dart';
 import 'package:get_it/common/commonTextField.dart';
@@ -7,8 +8,10 @@ import 'package:get_it/models/helperModel.dart';
 import 'package:get_it/models/userModel.dart';
 
 class HelperFormPage extends StatefulWidget {
-  const HelperFormPage({super.key, required this.userModel});
+  const HelperFormPage(
+      {super.key, required this.userModel, required this.firebaseUser});
   final UserModel userModel;
+  final User firebaseUser;
 
   @override
   State<HelperFormPage> createState() => _HelperFormPageState();
@@ -44,7 +47,7 @@ class _HelperFormPageState extends State<HelperFormPage> {
             MaterialPageRoute(builder: (context) {
           return bottomNav(
             userModel: widget.userModel,
-            firebaseUser: null,
+            firebaseUser: widget.firebaseUser,
           );
         }));
       }

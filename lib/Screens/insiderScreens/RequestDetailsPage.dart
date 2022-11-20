@@ -1,8 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:expandable_text/expandable_text.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/Screens/HomePage/requestTile.dart';
+import 'package:get_it/Screens/chat/chatroom.dart';
 import 'package:get_it/models/comment.dart';
+import 'package:get_it/models/firebaseHelper.dart';
 import 'package:get_it/models/localStorage.dart';
 import 'package:get_it/models/requestModel.dart';
 import 'package:get_it/models/userModel.dart';
@@ -10,13 +13,16 @@ import 'package:slide_to_act/slide_to_act.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
 class RequestDetailPage extends StatefulWidget {
-  const RequestDetailPage(
-      {super.key,
-      required this.requestModel,
-      this.isUserPost,
-      required this.loggedUserModel});
+  const RequestDetailPage({
+    super.key,
+    required this.requestModel,
+    this.isUserPost,
+    required this.loggedUserModel,
+    required this.firebaseUser,
+  });
   final RequestModel requestModel;
   final UserModel loggedUserModel;
+  final User firebaseUser;
   final bool? isUserPost;
 
   @override
@@ -110,6 +116,7 @@ class _RequestDetailPageState extends State<RequestDetailPage> {
                                                   DateTime.now(),
                                           loggedUserModel:
                                               widget.loggedUserModel,
+                                          firebaseUser: widget.firebaseUser,
                                         ),
                                         commentTile(
                                           helperName: currentHelp.commentBy,
@@ -175,6 +182,7 @@ class _RequestDetailPageState extends State<RequestDetailPage> {
                                 requestedon: widget.requestModel.requestedOn ??
                                     DateTime.now(),
                                 loggedUserModel: widget.loggedUserModel,
+                                firebaseUser: widget.firebaseUser,
                               ),
                               Center(
                                 child: Text("No one offered any help yet :("),
@@ -227,6 +235,12 @@ class commentTile extends StatefulWidget {
 }
 
 class _commentTileState extends State<commentTile> {
+  void helpAccepted() async {
+    String? currentCollege = await LocalStorage.getCollege();
+    UserModel? targetModel = await FirebaseHelper.getUserModelById(
+        widget.helperId ?? "", currentCollege);
+  }
+
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
@@ -311,6 +325,7 @@ class _commentTileState extends State<commentTile> {
                             child: SlideAction(
                               onSubmit: () {
                                 //
+                                helpAccepted();
                               },
                               outerColor: const Color(0xffA6BBDE),
                               submittedIcon: const Icon(Icons.handshake,
