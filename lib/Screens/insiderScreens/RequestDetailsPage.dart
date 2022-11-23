@@ -1,9 +1,13 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:expandable_text/expandable_text.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/Screens/HomePage/requestTile.dart';
 import 'package:get_it/Screens/chat/chatroom.dart';
+import 'package:get_it/main.dart';
+import 'package:get_it/models/chatRoomModel.dart';
 import 'package:get_it/models/comment.dart';
 import 'package:get_it/models/firebaseHelper.dart';
 import 'package:get_it/models/localStorage.dart';
@@ -50,6 +54,20 @@ class _RequestDetailPageState extends State<RequestDetailPage> {
         .get();
 
     return data;
+  }
+
+  void createChat() async {
+    String? currentCollege = await LocalStorage.getCollege();
+    String? chatid = uuid.v1();
+
+    DocumentSnapshot chatData = await FirebaseFirestore.instance
+        .collection("College")
+        .doc(currentCollege)
+        .collection("Chats")
+        .doc()
+        .get();
+    ChatRoomModel chatRoomModel =
+        ChatRoomModel.fromMap(chatData.data() as Map<String, dynamic>);
   }
 
   @override
@@ -122,6 +140,7 @@ class _RequestDetailPageState extends State<RequestDetailPage> {
                                           helperName: currentHelp.commentBy,
                                           loggedUserModel:
                                               widget.loggedUserModel,
+                                          firebaseUsser: widget.firebaseUser,
                                           time: currentHelp.timing,
                                           commentedOn: currentHelp.commentedOn,
                                           note: currentHelp.note,
@@ -143,6 +162,7 @@ class _RequestDetailPageState extends State<RequestDetailPage> {
                                         commentTile(
                                           loggedUserModel:
                                               widget.loggedUserModel,
+                                          firebaseUsser: widget.firebaseUser,
                                           helperName: currentHelp.commentBy,
                                           time: currentHelp.timing,
                                           commentedOn: currentHelp.commentedOn,
@@ -214,31 +234,67 @@ class commentTile extends StatefulWidget {
   final String? helperName;
   final String? helperId;
   final UserModel loggedUserModel;
+  final User firebaseUsser;
 
   final DateTime? commentedOn;
   final String? time;
   final String? note;
   final RequestModel requestModel;
 
-  const commentTile(
-      {super.key,
-      this.helperName,
-      this.commentedOn,
-      this.time,
-      this.note,
-      required this.requestModel,
-      this.helperId,
-      required this.loggedUserModel});
+  const commentTile({
+    super.key,
+    this.helperName,
+    this.commentedOn,
+    this.time,
+    this.note,
+    required this.requestModel,
+    this.helperId,
+    required this.loggedUserModel,
+    required this.firebaseUsser,
+  });
 
   @override
   State<commentTile> createState() => _commentTileState();
 }
 
 class _commentTileState extends State<commentTile> {
-  void helpAccepted() async {
-    String? currentCollege = await LocalStorage.getCollege();
-    UserModel? targetModel = await FirebaseHelper.getUserModelById(
-        widget.helperId ?? "", currentCollege);
+  Future<ChatRoomModel?> getChatRoomModel(UserModel targetUser) async {
+    ChatRoomModel? chatRoom;
+    QuerySnapshot snapshot = await FirebaseFirestore.instance
+        .collection("College")
+        .doc(widget.loggedUserModel.college)
+        .collection("chatrooms")
+        .where("participants.${widget.loggedUserModel.uid}", isEqualTo: true)
+        .where("participants.${targetUser.uid}", isEqualTo: true)
+        .get();
+
+    if (snapshot.docs.length > 0) {
+      // fetch
+      var docData = snapshot.docs[0].data();
+      ChatRoomModel existingChatroom =
+          ChatRoomModel.fromMap(docData as Map<String, dynamic>);
+      chatRoom = existingChatroom;
+    } else {
+      // create
+      ChatRoomModel newChatroom = ChatRoomModel(
+        chatroomid: uuid.v1(),
+        lastMessage: "",
+        chatClosed: false,
+        createdon: DateTime.now(),
+        participants: {
+          widget.loggedUserModel.uid.toString(): true,
+          targetUser.uid.toString(): true,
+        },
+      );
+      await FirebaseFirestore.instance
+          .collection("College")
+          .doc(widget.loggedUserModel.college)
+          .collection("chatrooms")
+          .doc(newChatroom.chatroomid)
+          .set(newChatroom.toMap());
+      chatRoom = newChatroom;
+    }
+    return chatRoom;
   }
 
   @override
@@ -246,7 +302,7 @@ class _commentTileState extends State<commentTile> {
     Size size = MediaQuery.of(context).size;
 
     return Container(
-      margin: EdgeInsets.only(bottom: 7),
+      margin: const EdgeInsets.only(bottom: 7),
       width: size.width,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -275,7 +331,7 @@ class _commentTileState extends State<commentTile> {
                     widget.commentedOn != null
                         ? timeago.format(widget.commentedOn ?? DateTime.now())
                         : "NA :(",
-                    style: TextStyle(
+                    style: const TextStyle(
                       color: Colors.grey,
                       fontSize: 9,
                     ),
@@ -292,7 +348,8 @@ class _commentTileState extends State<commentTile> {
                   collapseText: "show less",
                   maxLines: 1,
                   linkColor: Colors.black.withOpacity(0.3),
-                  linkStyle: TextStyle(decoration: TextDecoration.underline),
+                  linkStyle:
+                      const TextStyle(decoration: TextDecoration.underline),
                 )
               : Container(),
           Container(
@@ -323,9 +380,32 @@ class _commentTileState extends State<commentTile> {
                             widget.loggedUserModel.fullname
                         ? Flexible(
                             child: SlideAction(
-                              onSubmit: () {
-                                //
-                                helpAccepted();
+                              onSubmit: () async {
+                                UserModel? targetModel =
+                                    await FirebaseHelper.getUserModelById(
+                                        widget.helperId ?? "",
+                                        widget.loggedUserModel.college);
+
+                                ChatRoomModel? chatroomModel =
+                                    await getChatRoomModel(
+                                        targetModel ?? widget.loggedUserModel);
+
+                                if (chatroomModel != null) {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) {
+                                        return ChatScreen(
+                                          targetUser: targetModel ??
+                                              widget.loggedUserModel,
+                                          userModel: widget.loggedUserModel,
+                                          firebaseUser: widget.firebaseUsser,
+                                          chatRoomModel: chatroomModel,
+                                        );
+                                      },
+                                    ),
+                                  );
+                                }
                               },
                               outerColor: const Color(0xffA6BBDE),
                               submittedIcon: const Icon(Icons.handshake,

@@ -3,6 +3,7 @@ class UserModel {
   String? fullname;
   String? email;
   String? college;
+  String? profilepic;
   String? idCard;
   String? batch;
   String? branch;
@@ -12,6 +13,7 @@ class UserModel {
       this.fullname,
       this.email,
       this.college,
+      this.profilepic,
       this.idCard,
       this.batch,
       this.branch});
@@ -21,6 +23,7 @@ class UserModel {
     fullname = map["fullname"];
     email = map["email"];
     college = map["college"];
+    profilepic = map["profilepic"];
     idCard = map["idcard"];
     batch = map["batch"];
     branch = map["branch"];
@@ -32,6 +35,7 @@ class UserModel {
       "fullname": fullname,
       "email": email,
       "college": college,
+      "profilepic": profilepic,
       "idCard": idCard,
       "branch": branch,
       "batch": batch,

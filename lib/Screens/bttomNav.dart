@@ -25,11 +25,10 @@ class _bottomNavState extends State<bottomNav> {
       userModel: widget.userModel,
       firebaseUser: widget.firebaseUser,
     ),
-    // ChatPage(
-    //   chatroom: null,
-
-    // ),
-    NotifPage(),
+    ChatPage(
+      loggedinUserModel: widget.userModel,
+      firebaseUser: widget.firebaseUser,
+    ),
     NotifPage(),
     ProfilePage(
       userModel: widget.userModel,
