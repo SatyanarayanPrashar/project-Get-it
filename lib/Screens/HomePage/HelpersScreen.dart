@@ -218,7 +218,7 @@ class HelperTile extends StatelessWidget {
                     ),
                   ),
                 ),
-                true
+                helperUid != userModel.uid
                     ? Flexible(
                         child: SlideAction(
                           onSubmit: () {
@@ -228,6 +228,7 @@ class HelperTile extends StatelessWidget {
                                 userModel: userModel,
                                 firebaseUser: firebaseUser,
                                 isitPersonalised: true,
+                                helperUid: helperUid ?? "",
                               );
                             }));
                           },

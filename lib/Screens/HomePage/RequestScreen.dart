@@ -57,6 +57,7 @@ class _RequestScreenState extends State<RequestScreen> {
             return RequestForm(
               userModel: widget.userModel,
               firebaseUser: widget.firebaseUser,
+              helperUid: "No helper required",
             );
           }));
         },

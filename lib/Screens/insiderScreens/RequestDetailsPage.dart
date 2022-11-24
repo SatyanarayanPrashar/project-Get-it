@@ -392,41 +392,40 @@ class _commentTileState extends State<commentTile> {
                             child: SlideAction(
                               onSubmit: () async {
                                 showConfirmationDialog(
-                                    context: context,
-                                    message: "Go to chat and discuss :D",
-                                    onPress: () async {
-                                      Navigator.pop(context);
-                                      UserModel? targetModel =
-                                          await FirebaseHelper.getUserModelById(
-                                              widget.helperId ?? "",
-                                              widget.loggedUserModel.college);
+                                  context: context,
+                                  message: "Go to chat and discuss :D",
+                                  onPress: () async {
+                                    Navigator.pop(context);
+                                    UserModel? targetModel =
+                                        await FirebaseHelper.getUserModelById(
+                                            widget.helperId ?? "",
+                                            widget.loggedUserModel.college);
 
-                                      ChatRoomModel? chatroomModel =
-                                          await getChatRoomModel(targetModel ??
-                                              widget.loggedUserModel);
+                                    ChatRoomModel? chatroomModel =
+                                        await getChatRoomModel(targetModel ??
+                                            widget.loggedUserModel);
 
-                                      if (chatroomModel != null) {
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (context) {
-                                              return ChatScreen(
-                                                accessedFrom: "request",
-                                                targetUser: targetModel ??
-                                                    widget.loggedUserModel,
-                                                userModel:
-                                                    widget.loggedUserModel,
-                                                firebaseUser:
-                                                    widget.firebaseUsser,
-                                                chatRoomModel: chatroomModel,
-                                                requestModel:
-                                                    widget.requestModel,
-                                              );
-                                            },
-                                          ),
-                                        );
-                                      }
-                                    });
+                                    if (chatroomModel != null) {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) {
+                                            return ChatScreen(
+                                              accessedFrom: "request",
+                                              targetUser: targetModel ??
+                                                  widget.loggedUserModel,
+                                              userModel: widget.loggedUserModel,
+                                              firebaseUser:
+                                                  widget.firebaseUsser,
+                                              chatRoomModel: chatroomModel,
+                                              requestModel: widget.requestModel,
+                                            );
+                                          },
+                                        ),
+                                      );
+                                    }
+                                  },
+                                );
                               },
                               outerColor: const Color(0xffA6BBDE),
                               submittedIcon: const Icon(Icons.handshake,

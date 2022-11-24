@@ -2,8 +2,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/Screens/bttomNav.dart';
+import 'package:get_it/Screens/chat/chatroom.dart';
 import 'package:get_it/common/actionmessage.dart';
 import 'package:get_it/common/commonTextField.dart';
+import 'package:get_it/models/chatRoomModel.dart';
+import 'package:get_it/models/firebaseHelper.dart';
 import 'package:get_it/models/requestModel.dart';
 import 'package:get_it/models/userModel.dart';
 
@@ -14,10 +17,12 @@ class RequestForm extends StatefulWidget {
     super.key,
     required this.userModel,
     required this.firebaseUser,
+    required this.helperUid,
     this.isitPersonalised,
   });
   final UserModel userModel;
   final User firebaseUser;
+  final String helperUid;
   final bool? isitPersonalised;
 
   @override
@@ -51,9 +56,62 @@ class _RequestFormState extends State<RequestForm> {
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
+    String requestUid = uuid.v1();
+
+    Future<ChatRoomModel?> getChatRoomModel(UserModel targetUser) async {
+      ChatRoomModel? chatRoom;
+      QuerySnapshot snapshot = await FirebaseFirestore.instance
+          .collection("College")
+          .doc(widget.userModel.college)
+          .collection("chatrooms")
+          .where("participants.${widget.userModel.uid}", isEqualTo: true)
+          .where("participants.${targetUser.uid}", isEqualTo: true)
+          .get();
+
+      if (snapshot.docs.length > 0) {
+        // fetch
+        var docData = snapshot.docs[0].data();
+        ChatRoomModel existingChatroom =
+            ChatRoomModel.fromMap(docData as Map<String, dynamic>);
+        chatRoom = existingChatroom;
+
+        FirebaseFirestore.instance
+            .collection("College")
+            .doc(widget.userModel.college)
+            .collection("chatrooms")
+            .doc(chatRoom.chatroomid)
+            .update({"chatClosed": false}).then(
+                (value) => print(chatRoom?.chatClosed));
+      } else {
+        // create
+        ChatRoomModel newChatroom = ChatRoomModel(
+          chatroomid: uuid.v1(),
+          lastMessage: "",
+          requestid: requestUid,
+          chatClosed: false,
+          createdon: DateTime.now(),
+          participants: {
+            widget.userModel.uid.toString(): true,
+            targetUser.uid.toString(): true,
+          },
+        );
+        await FirebaseFirestore.instance
+            .collection("College")
+            .doc(widget.userModel.college)
+            .collection("chatrooms")
+            .doc(newChatroom.chatroomid)
+            .set(newChatroom.toMap());
+        chatRoom = newChatroom;
+      }
+      return chatRoom;
+    }
 
     void createRequest() async {
-      String requestUid = uuid.v1();
+      UserModel? targetModel = await FirebaseHelper.getUserModelById(
+          widget.helperUid, widget.userModel.college);
+      ChatRoomModel? chatroomModel =
+          await getChatRoomModel(targetModel ?? widget.userModel);
+
       if (getitBycontroller.text.isNotEmpty) {
         if (onecontroller.text.isNotEmpty) {
           if (onequantitycontroller.text.isNotEmpty) {
@@ -87,13 +145,31 @@ class _RequestFormState extends State<RequestForm> {
                     .doc(widget.userModel.college)
                     .update({"requestCount": FieldValue.increment(1)});
 
-                Navigator.pushReplacement(context,
-                    MaterialPageRoute(builder: (context) {
-                  return bottomNav(
-                    userModel: widget.userModel,
-                    firebaseUser: widget.firebaseUser,
-                  );
-                }));
+                widget.isitPersonalised ?? false
+                    ? chatroomModel != null
+                        ? Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) {
+                                return ChatScreen(
+                                  accessedFrom: "request",
+                                  targetUser: targetModel ?? widget.userModel,
+                                  userModel: widget.userModel,
+                                  firebaseUser: widget.firebaseUser,
+                                  chatRoomModel: chatroomModel,
+                                  requestModel: newRequest,
+                                );
+                              },
+                            ),
+                          )
+                        : print("failed")
+                    : Navigator.pushReplacement(context,
+                        MaterialPageRoute(builder: (context) {
+                        return bottomNav(
+                          userModel: widget.userModel,
+                          firebaseUser: widget.firebaseUser,
+                        );
+                      }));
               });
             } else {
               ScaffoldMessenger.of(context).showSnackBar(const SnackBar(

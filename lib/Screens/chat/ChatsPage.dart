@@ -1,6 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/Screens/chat/chatroom.dart';
 import 'package:get_it/models/chatRoomModel.dart';
@@ -44,86 +43,106 @@ class _ChatPageState extends State<ChatPage> {
                 if (snapshot.hasData) {
                   QuerySnapshot dataSnapshot = snapshot.data as QuerySnapshot;
 
-                  return ListView.builder(
-                    itemCount: dataSnapshot.docs.length,
-                    itemBuilder: (context, index) {
-                      ChatRoomModel chatRoomModel = ChatRoomModel.fromMap(
-                          dataSnapshot.docs[index].data()
-                              as Map<String, dynamic>);
-                      Map<String, dynamic> participants =
-                          chatRoomModel.participants!;
-                      List<String> participantsKeys =
-                          participants.keys.toList();
-                      participantsKeys.remove(widget.loggedinUserModel.uid);
+                  return dataSnapshot.docs.length == 0
+                      ? Column(
+                          children: [
+                            Row(),
+                            Container(
+                              height: 250,
+                              width: 250,
+                              decoration: const BoxDecoration(
+                                image: DecorationImage(
+                                  image: AssetImage("assets/Images/auth.jpg"),
+                                ),
+                              ),
+                            ),
+                            Text("No requests Yet!")
+                          ],
+                        )
+                      : ListView.builder(
+                          itemCount: dataSnapshot.docs.length,
+                          itemBuilder: (context, index) {
+                            ChatRoomModel chatRoomModel = ChatRoomModel.fromMap(
+                                dataSnapshot.docs[index].data()
+                                    as Map<String, dynamic>);
+                            Map<String, dynamic> participants =
+                                chatRoomModel.participants!;
+                            List<String> participantsKeys =
+                                participants.keys.toList();
+                            participantsKeys
+                                .remove(widget.loggedinUserModel.uid);
 
-                      return FutureBuilder(
-                        future: FirebaseHelper.getUserModelById(
-                            participantsKeys[0],
-                            widget.loggedinUserModel.college),
-                        builder: (context, userData) {
-                          return FutureBuilder(
-                              future: FirebaseHelper.getReqModelById(
-                                  chatRoomModel.requestid ?? ""),
-                              builder: (context, requestData) {
-                                if (requestData.connectionState ==
-                                    ConnectionState.done) {
-                                  if (requestData.data != null) {
-                                    RequestModel requestModel =
-                                        requestData.data as RequestModel;
-                                    if (userData.connectionState ==
-                                        ConnectionState.done) {
-                                      if (userData.data != null) {
-                                        UserModel targetUser =
-                                            userData.data as UserModel;
-                                        return ListTile(
-                                          onTap: () {
-                                            Navigator.push(
-                                              context,
-                                              MaterialPageRoute(
-                                                builder: (context) {
-                                                  return ChatScreen(
-                                                    accessedFrom: "inbox",
-                                                    requestModel: requestModel,
-                                                    targetUser: targetUser,
-                                                    userModel: widget
-                                                        .loggedinUserModel,
-                                                    firebaseUser:
-                                                        widget.firebaseUser,
-                                                    chatRoomModel:
-                                                        chatRoomModel,
+                            return FutureBuilder(
+                              future: FirebaseHelper.getUserModelById(
+                                  participantsKeys[0],
+                                  widget.loggedinUserModel.college),
+                              builder: (context, userData) {
+                                return FutureBuilder(
+                                    future: FirebaseHelper.getReqModelById(
+                                        chatRoomModel.requestid ?? ""),
+                                    builder: (context, requestData) {
+                                      if (requestData.connectionState ==
+                                          ConnectionState.done) {
+                                        if (requestData.data != null) {
+                                          RequestModel requestModel =
+                                              requestData.data as RequestModel;
+                                          if (userData.connectionState ==
+                                              ConnectionState.done) {
+                                            if (userData.data != null) {
+                                              UserModel targetUser =
+                                                  userData.data as UserModel;
+                                              return ListTile(
+                                                onTap: () {
+                                                  Navigator.push(
+                                                    context,
+                                                    MaterialPageRoute(
+                                                      builder: (context) {
+                                                        return ChatScreen(
+                                                          accessedFrom: "inbox",
+                                                          requestModel:
+                                                              requestModel,
+                                                          targetUser:
+                                                              targetUser,
+                                                          userModel: widget
+                                                              .loggedinUserModel,
+                                                          firebaseUser: widget
+                                                              .firebaseUser,
+                                                          chatRoomModel:
+                                                              chatRoomModel,
+                                                        );
+                                                      },
+                                                    ),
                                                   );
                                                 },
-                                              ),
-                                            );
-                                          },
-                                          leading: const CircleAvatar(
-                                            backgroundColor: Colors.yellow,
-                                          ),
-                                          title: Text(
-                                              targetUser.fullname.toString()),
-                                          subtitle: Text(chatRoomModel
-                                              .lastMessage
-                                              .toString()),
-                                        );
+                                                leading: const CircleAvatar(
+                                                  backgroundColor:
+                                                      Colors.yellow,
+                                                ),
+                                                title: Text(targetUser.fullname
+                                                    .toString()),
+                                                subtitle: Text(chatRoomModel
+                                                    .lastMessage
+                                                    .toString()),
+                                              );
+                                            } else {
+                                              return Container();
+                                            }
+                                          } else {
+                                            return Container();
+                                          }
+                                        } else {
+                                          return Text("request data null");
+                                        }
                                       } else {
-                                        return Container();
+                                        return const Center(
+                                          child: CircularProgressIndicator(),
+                                        );
                                       }
-                                    } else {
-                                      return Container();
-                                    }
-                                  } else {
-                                    return Container();
-                                  }
-                                } else {
-                                  return const Center(
-                                    child: CircularProgressIndicator(),
-                                  );
-                                }
-                              });
-                        },
-                      );
-                    },
-                  );
+                                    });
+                              },
+                            );
+                          },
+                        );
                 } else if (snapshot.hasError) {
                   print(snapshot.error);
                   return Center(
