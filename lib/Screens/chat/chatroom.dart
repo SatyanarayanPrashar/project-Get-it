@@ -131,183 +131,284 @@ class _ChatScreenState extends State<ChatScreen> {
                       if (snapshot.hasData) {
                         QuerySnapshot dataSnapshot =
                             snapshot.data as QuerySnapshot;
-                        return ListView.builder(
-                          reverse: true,
-                          itemCount: dataSnapshot.docs.length,
-                          itemBuilder: (context, index) {
-                            MessageModel currentMssg = MessageModel.fromMap(
-                                dataSnapshot.docs[index].data()
-                                    as Map<String, dynamic>);
+                        return dataSnapshot.docs.length == 0
+                            ? SingleChildScrollView(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    Row(),
+                                    Container(
+                                      height: 250,
+                                      width: 250,
+                                      decoration: const BoxDecoration(
+                                        image: DecorationImage(
+                                          image: AssetImage(
+                                              "assets/Images/auth.jpg"),
+                                        ),
+                                      ),
+                                    ),
+                                    const Text(
+                                        "Discuss more about your request,"),
+                                    const Text(
+                                        "like location for hand over and payments."),
+                                    const Text("GetiT;)"),
+                                    const SizedBox(height: 16),
+                                    Container(
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 11),
+                                        decoration: BoxDecoration(
+                                            borderRadius:
+                                                BorderRadius.circular(21),
+                                            border: Border.all()),
+                                        child: RequestTile(
+                                          tileLocation: "chat",
+                                          requestedon: DateTime.now(),
+                                          loggedUserModel: widget.userModel,
+                                          firebaseUser: widget.firebaseUser,
+                                          note:
+                                              "Hii ${widget.targetUser.fullname}, can you Please get it for me :)",
+                                          one: widget.requestModel?.one,
+                                          oneQuantity:
+                                              widget.requestModel?.oneQuantity,
+                                          two: widget.requestModel?.two,
+                                          twoQuantity:
+                                              widget.requestModel?.twoQuantity,
+                                          three: widget.requestModel?.three,
+                                          threeQuantity: widget
+                                              .requestModel?.threeQuantity,
+                                          getitBy: widget.requestModel?.getby,
+                                          price: widget.requestModel?.price,
+                                        )),
+                                  ],
+                                ),
+                              )
+                            : ListView.builder(
+                                reverse: true,
+                                itemCount: dataSnapshot.docs.length,
+                                itemBuilder: (context, index) {
+                                  MessageModel currentMssg =
+                                      MessageModel.fromMap(
+                                          dataSnapshot.docs[index].data()
+                                              as Map<String, dynamic>);
 
-                            return index == dataSnapshot.docs.length - 1
-                                ? Column(
-                                    children: [
-                                      Container(
-                                          padding: const EdgeInsets.symmetric(
-                                              horizontal: 11),
-                                          decoration: BoxDecoration(
-                                              borderRadius:
-                                                  BorderRadius.circular(21),
-                                              border: Border.all()),
-                                          child: RequestTile(
-                                            tileLocation: "chat",
-                                            requestedon: DateTime.now(),
-                                            loggedUserModel: widget.userModel,
-                                            firebaseUser: widget.firebaseUser,
-                                            note:
-                                                "Hii ${widget.targetUser.fullname}, can you Please get it for me :)",
-                                            one: widget.requestModel?.one,
-                                            oneQuantity: widget
-                                                .requestModel?.oneQuantity,
-                                            two: widget.requestModel?.two,
-                                            twoQuantity: widget
-                                                .requestModel?.twoQuantity,
-                                            three: widget.requestModel?.three,
-                                            threeQuantity: widget
-                                                .requestModel?.threeQuantity,
-                                            getitBy: widget.requestModel?.getby,
-                                            price: widget.requestModel?.price,
-                                          )),
-                                      Row(
-                                        mainAxisAlignment:
-                                            (currentMssg.sender ==
-                                                    widget.userModel.uid)
-                                                ? MainAxisAlignment.end
-                                                : MainAxisAlignment.start,
-                                        children: [
-                                          Container(
-                                            constraints: BoxConstraints(
-                                                minHeight: 0,
-                                                maxWidth: size.width * 0.6),
-                                            margin: const EdgeInsets.symmetric(
-                                                vertical: 2),
-                                            padding: const EdgeInsets.symmetric(
-                                                vertical: 10, horizontal: 10),
-                                            decoration: BoxDecoration(
-                                              borderRadius: (currentMssg
-                                                          .sender ==
-                                                      widget.userModel.uid)
-                                                  ? const BorderRadius.only(
-                                                      topLeft:
-                                                          Radius.circular(14),
-                                                      topRight:
-                                                          Radius.circular(14),
-                                                      bottomLeft:
-                                                          Radius.circular(14))
-                                                  : const BorderRadius.only(
-                                                      topLeft:
-                                                          Radius.circular(14),
-                                                      topRight:
-                                                          Radius.circular(14),
-                                                      bottomRight:
-                                                          Radius.circular(14)),
-                                              color: (currentMssg.sender ==
-                                                      widget.userModel.uid)
-                                                  ? Colors.blue.withOpacity(0.4)
-                                                  : Colors.blue
-                                                      .withOpacity(0.7),
-                                            ),
-                                            child: Column(
-                                              crossAxisAlignment:
+                                  return index == dataSnapshot.docs.length - 1
+                                      ? Column(
+                                          children: [
+                                            Container(
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                        horizontal: 11),
+                                                decoration: BoxDecoration(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            21),
+                                                    border: Border.all()),
+                                                child: RequestTile(
+                                                  tileLocation: "chat",
+                                                  requestedon: DateTime.now(),
+                                                  loggedUserModel:
+                                                      widget.userModel,
+                                                  firebaseUser:
+                                                      widget.firebaseUser,
+                                                  note:
+                                                      "Hii ${widget.targetUser.fullname}, can you Please get it for me :)",
+                                                  one: widget.requestModel?.one,
+                                                  oneQuantity: widget
+                                                      .requestModel
+                                                      ?.oneQuantity,
+                                                  two: widget.requestModel?.two,
+                                                  twoQuantity: widget
+                                                      .requestModel
+                                                      ?.twoQuantity,
+                                                  three: widget
+                                                      .requestModel?.three,
+                                                  threeQuantity: widget
+                                                      .requestModel
+                                                      ?.threeQuantity,
+                                                  getitBy: widget
+                                                      .requestModel?.getby,
+                                                  price: widget
+                                                      .requestModel?.price,
+                                                )),
+                                            Row(
+                                              mainAxisAlignment:
                                                   (currentMssg.sender ==
                                                           widget.userModel.uid)
-                                                      ? CrossAxisAlignment.start
-                                                      : CrossAxisAlignment.end,
+                                                      ? MainAxisAlignment.end
+                                                      : MainAxisAlignment.start,
                                               children: [
-                                                Padding(
-                                                  padding:
-                                                      const EdgeInsets.only(
-                                                          bottom: 4),
-                                                  child: Text(
-                                                    currentMssg.text.toString(),
+                                                Container(
+                                                  constraints: BoxConstraints(
+                                                      minHeight: 0,
+                                                      maxWidth:
+                                                          size.width * 0.6),
+                                                  margin: const EdgeInsets
+                                                      .symmetric(vertical: 2),
+                                                  padding: const EdgeInsets
+                                                          .symmetric(
+                                                      vertical: 10,
+                                                      horizontal: 10),
+                                                  decoration: BoxDecoration(
+                                                    borderRadius: (currentMssg
+                                                                .sender ==
+                                                            widget
+                                                                .userModel.uid)
+                                                        ? const BorderRadius.only(
+                                                            topLeft:
+                                                                Radius.circular(
+                                                                    14),
+                                                            topRight:
+                                                                Radius.circular(
+                                                                    14),
+                                                            bottomLeft:
+                                                                Radius.circular(
+                                                                    14))
+                                                        : const BorderRadius.only(
+                                                            topLeft:
+                                                                Radius.circular(
+                                                                    14),
+                                                            topRight:
+                                                                Radius.circular(
+                                                                    14),
+                                                            bottomRight:
+                                                                Radius.circular(14)),
+                                                    color: (currentMssg
+                                                                .sender ==
+                                                            widget
+                                                                .userModel.uid)
+                                                        ? Colors.blue
+                                                            .withOpacity(0.4)
+                                                        : Colors.blue
+                                                            .withOpacity(0.7),
                                                   ),
-                                                ),
-                                                Text(
-                                                  timeago
-                                                      .format(currentMssg
-                                                              .createdon ??
-                                                          DateTime.now())
-                                                      .replaceAll(
-                                                          "minutes", "m")
-                                                      .replaceAll("hours", "hr")
-                                                      .replaceAll("days", "d"),
-                                                  style: const TextStyle(
-                                                      fontSize: 9,
-                                                      color: Colors.white),
+                                                  child: Column(
+                                                    crossAxisAlignment:
+                                                        (currentMssg.sender ==
+                                                                widget.userModel
+                                                                    .uid)
+                                                            ? CrossAxisAlignment
+                                                                .start
+                                                            : CrossAxisAlignment
+                                                                .end,
+                                                    children: [
+                                                      Padding(
+                                                        padding:
+                                                            const EdgeInsets
+                                                                    .only(
+                                                                bottom: 4),
+                                                        child: Text(
+                                                          currentMssg.text
+                                                              .toString(),
+                                                        ),
+                                                      ),
+                                                      Text(
+                                                        timeago
+                                                            .format(currentMssg
+                                                                    .createdon ??
+                                                                DateTime.now())
+                                                            .replaceAll(
+                                                                "minutes", "m")
+                                                            .replaceAll(
+                                                                "hours", "hr")
+                                                            .replaceAll(
+                                                                "days", "d"),
+                                                        style: const TextStyle(
+                                                            fontSize: 9,
+                                                            color:
+                                                                Colors.white),
+                                                      ),
+                                                    ],
+                                                  ),
                                                 ),
                                               ],
                                             ),
-                                          ),
-                                        ],
-                                      ),
-                                    ],
-                                  )
-                                : Row(
-                                    mainAxisAlignment: (currentMssg.sender ==
-                                            widget.userModel.uid)
-                                        ? MainAxisAlignment.end
-                                        : MainAxisAlignment.start,
-                                    children: [
-                                      Container(
-                                        constraints: BoxConstraints(
-                                            minHeight: 0,
-                                            maxWidth: size.width * 0.6),
-                                        margin: const EdgeInsets.symmetric(
-                                            vertical: 2),
-                                        padding: const EdgeInsets.symmetric(
-                                            vertical: 10, horizontal: 10),
-                                        decoration: BoxDecoration(
-                                          borderRadius: (currentMssg.sender ==
-                                                  widget.userModel.uid)
-                                              ? const BorderRadius.only(
-                                                  topLeft: Radius.circular(14),
-                                                  topRight: Radius.circular(14),
-                                                  bottomLeft:
-                                                      Radius.circular(14))
-                                              : const BorderRadius.only(
-                                                  topLeft: Radius.circular(14),
-                                                  topRight: Radius.circular(14),
-                                                  bottomRight:
-                                                      Radius.circular(14)),
-                                          color: (currentMssg.sender ==
-                                                  widget.userModel.uid)
-                                              ? Colors.blue.withOpacity(0.4)
-                                              : Colors.blue.withOpacity(0.7),
-                                        ),
-                                        child: Column(
-                                          crossAxisAlignment:
+                                          ],
+                                        )
+                                      : Row(
+                                          mainAxisAlignment:
                                               (currentMssg.sender ==
                                                       widget.userModel.uid)
-                                                  ? CrossAxisAlignment.start
-                                                  : CrossAxisAlignment.end,
+                                                  ? MainAxisAlignment.end
+                                                  : MainAxisAlignment.start,
                                           children: [
-                                            Padding(
-                                              padding: const EdgeInsets.only(
-                                                  bottom: 4),
-                                              child: Text(
-                                                currentMssg.text.toString(),
+                                            Container(
+                                              constraints: BoxConstraints(
+                                                  minHeight: 0,
+                                                  maxWidth: size.width * 0.6),
+                                              margin:
+                                                  const EdgeInsets.symmetric(
+                                                      vertical: 2),
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                      vertical: 10,
+                                                      horizontal: 10),
+                                              decoration: BoxDecoration(
+                                                borderRadius: (currentMssg
+                                                            .sender ==
+                                                        widget.userModel.uid)
+                                                    ? const BorderRadius.only(
+                                                        topLeft:
+                                                            Radius.circular(14),
+                                                        topRight:
+                                                            Radius.circular(14),
+                                                        bottomLeft:
+                                                            Radius.circular(14))
+                                                    : const BorderRadius.only(
+                                                        topLeft:
+                                                            Radius.circular(14),
+                                                        topRight:
+                                                            Radius.circular(14),
+                                                        bottomRight:
+                                                            Radius.circular(
+                                                                14)),
+                                                color: (currentMssg.sender ==
+                                                        widget.userModel.uid)
+                                                    ? Colors.blue
+                                                        .withOpacity(0.4)
+                                                    : Colors.blue
+                                                        .withOpacity(0.7),
+                                              ),
+                                              child: Column(
+                                                crossAxisAlignment: (currentMssg
+                                                            .sender ==
+                                                        widget.userModel.uid)
+                                                    ? CrossAxisAlignment.start
+                                                    : CrossAxisAlignment.end,
+                                                children: [
+                                                  Padding(
+                                                    padding:
+                                                        const EdgeInsets.only(
+                                                            bottom: 4),
+                                                    child: Text(
+                                                      currentMssg.text
+                                                          .toString(),
+                                                    ),
+                                                  ),
+                                                  Text(
+                                                    timeago
+                                                        .format(currentMssg
+                                                                .createdon ??
+                                                            DateTime.now())
+                                                        .replaceAll(
+                                                            "minutes", "m")
+                                                        .replaceAll(
+                                                            "minute", "m")
+                                                        .replaceAll(
+                                                            "hours", "hr")
+                                                        .replaceAll(
+                                                            "days", "d"),
+                                                    style: const TextStyle(
+                                                        fontSize: 9,
+                                                        color: Colors.white),
+                                                  ),
+                                                ],
                                               ),
                                             ),
-                                            Text(
-                                              timeago
-                                                  .format(
-                                                      currentMssg.createdon ??
-                                                          DateTime.now())
-                                                  .replaceAll("minutes", "m")
-                                                  .replaceAll("minute", "m")
-                                                  .replaceAll("hours", "hr")
-                                                  .replaceAll("days", "d"),
-                                              style: const TextStyle(
-                                                  fontSize: 9,
-                                                  color: Colors.white),
-                                            ),
                                           ],
-                                        ),
-                                      ),
-                                    ],
-                                  );
-                          },
-                        );
+                                        );
+                                },
+                              );
                       } else if (snapshot.hasError) {
                         return const Center(
                           child: Text("Something went wrong :("),
@@ -373,8 +474,7 @@ class _ChatScreenState extends State<ChatScreen> {
                                     borderRadius: BorderRadius.circular(20),
                                   ),
                                   child: Text(
-                                    widget.chatRoomModel.chatClosed.toString(),
-                                    // "ID Card",
+                                    "ID Card",
                                     style: TextStyle(
                                         color: Colors.black.withOpacity(0.7)),
                                   ),

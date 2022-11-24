@@ -36,7 +36,6 @@ class _ChatPageState extends State<ChatPage> {
                 .collection("chatrooms")
                 .where("participants.${widget.loggedinUserModel.uid}",
                     isEqualTo: true)
-                // .orderBy("createdon", descending: true)
                 .snapshots(),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.active) {
@@ -45,6 +44,8 @@ class _ChatPageState extends State<ChatPage> {
 
                   return dataSnapshot.docs.length == 0
                       ? Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
                             Row(),
                             Container(
@@ -56,7 +57,9 @@ class _ChatPageState extends State<ChatPage> {
                                 ),
                               ),
                             ),
-                            Text("No requests Yet!")
+                            const Text(
+                                "You have not discussed anyy request yet"),
+                            const Text("XD")
                           ],
                         )
                       : ListView.builder(
@@ -131,12 +134,10 @@ class _ChatPageState extends State<ChatPage> {
                                             return Container();
                                           }
                                         } else {
-                                          return Text("request data null");
+                                          return Container();
                                         }
                                       } else {
-                                        return const Center(
-                                          child: CircularProgressIndicator(),
-                                        );
+                                        return Container();
                                       }
                                     });
                               },
