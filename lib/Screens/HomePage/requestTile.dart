@@ -18,7 +18,7 @@ import 'package:timeago/timeago.dart' as timeago;
 
 class RequestTile extends StatefulWidget {
   final bool? isUserPost;
-  final bool? isOnHome;
+  final String? tileLocation;
   final String? requestedby;
   final DateTime requestedon;
   final String? one;
@@ -51,7 +51,7 @@ class RequestTile extends StatefulWidget {
     this.requestUid,
     this.refresh,
     this.isUserPost,
-    this.isOnHome,
+    this.tileLocation,
     required this.loggedUserModel,
     required this.firebaseUser,
   });
@@ -149,96 +149,99 @@ class _RequestTileState extends State<RequestTile> {
 
     return InkWell(
       onTap: () {
-        (widget.isOnHome ?? true) ? toDetails() : null;
+        (widget.tileLocation == "homepg") ? toDetails() : null;
       },
       child: Container(
         width: size.width,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              children: [
-                // Avatar , about and options
-                const CircleAvatar(
-                  radius: 20,
-                  backgroundImage: AssetImage("assets/Images/praposalHome.png"),
-                ),
-                const SizedBox(
-                  width: 7,
-                ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      widget.requestedby ?? "NA :(",
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w500,
-                        fontSize: 14,
+            widget.tileLocation == "chat"
+                ? Container()
+                : Row(
+                    children: [
+                      // Avatar , about and options
+                      const CircleAvatar(
+                        radius: 20,
+                        backgroundImage:
+                            AssetImage("assets/Images/praposalHome.png"),
                       ),
-                    ),
-                    Text(
-                      widget.requestedon != null
-                          ? timeago.format(widget.requestedon)
-                          : "NA :(",
-                      style: const TextStyle(
-                        color: Colors.grey,
-                        fontSize: 9,
+                      const SizedBox(
+                        width: 7,
                       ),
-                    ),
-                  ],
-                ),
-                const Spacer(),
-                IconButton(
-                  onPressed: () {
-                    //
-                    showModalBottomSheet(
-                      context: context,
-                      backgroundColor: Colors.transparent,
-                      builder: (context) => CustomBottomSheet(
-                        height: size.height * 0.2,
-                        childern: widget.isUserPost ?? false
-                            ? [
-                                BottomSheetItems(
-                                  onTap: () async {
-                                    //
-                                  },
-                                  title: "Share",
-                                ),
-                                BottomSheetItems(
-                                  onTap: () async {
-                                    showConfirmationDialog(
-                                        context: context,
-                                        message:
-                                            "Are you sure you want to Log out?",
-                                        onPress: () {
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            widget.requestedby ?? "NA :(",
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w500,
+                              fontSize: 14,
+                            ),
+                          ),
+                          Text(
+                            widget.requestedon != null
+                                ? timeago.format(widget.requestedon)
+                                : "NA :(",
+                            style: const TextStyle(
+                              color: Colors.grey,
+                              fontSize: 9,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const Spacer(),
+                      IconButton(
+                        onPressed: () {
+                          //
+                          showModalBottomSheet(
+                            context: context,
+                            backgroundColor: Colors.transparent,
+                            builder: (context) => CustomBottomSheet(
+                              height: size.height * 0.2,
+                              childern: widget.isUserPost ?? false
+                                  ? [
+                                      BottomSheetItems(
+                                        onTap: () async {
                                           //
-                                          deleteRequest();
-                                          print("torefresh");
-                                          widget.refresh;
-                                        });
-                                  },
-                                  title: "Delete",
-                                ),
-                              ]
-                            : [
-                                BottomSheetItems(
-                                  onTap: () {
-                                    //
-                                  },
-                                  title: "Share",
-                                ),
-                              ],
-                      ),
-                    );
-                  },
-                  icon: Icon(
-                    Icons.more_vert,
-                    size: 21,
-                    color: Colors.black.withOpacity(0.6),
+                                        },
+                                        title: "Share",
+                                      ),
+                                      BottomSheetItems(
+                                        onTap: () async {
+                                          showConfirmationDialog(
+                                              context: context,
+                                              message:
+                                                  "Are you sure you want to Log out?",
+                                              onPress: () {
+                                                //
+                                                deleteRequest();
+                                                print("torefresh");
+                                                widget.refresh;
+                                              });
+                                        },
+                                        title: "Delete",
+                                      ),
+                                    ]
+                                  : [
+                                      BottomSheetItems(
+                                        onTap: () {
+                                          //
+                                        },
+                                        title: "Share",
+                                      ),
+                                    ],
+                            ),
+                          );
+                        },
+                        icon: Icon(
+                          Icons.more_vert,
+                          size: 21,
+                          color: Colors.black.withOpacity(0.6),
+                        ),
+                      )
+                    ],
                   ),
-                )
-              ],
-            ),
             widget.note != ""
                 ? Padding(
                     padding: const EdgeInsets.only(top: 7),
@@ -350,70 +353,74 @@ class _RequestTileState extends State<RequestTile> {
                               ],
                             ),
                           ),
-                          Container(
-                            margin: EdgeInsets.fromLTRB(11, 7, 0, 0),
-                            width: size.width * 0.57,
-                            child: (widget.isUserPost ?? false)
-                                ? (widget.isOnHome ?? false)
-                                    ? InkWell(
-                                        onTap: () {
-                                          toDetails();
-                                        },
-                                        child: Container(
+                          widget.tileLocation == "chat"
+                              ? Container()
+                              : Container(
+                                  margin: EdgeInsets.fromLTRB(11, 7, 0, 0),
+                                  width: size.width * 0.57,
+                                  child: (widget.isUserPost ?? false)
+                                      ? (widget.tileLocation == "homepg")
+                                          ? InkWell(
+                                              onTap: () {
+                                                toDetails();
+                                              },
+                                              child: Container(
+                                                height: 50,
+                                                decoration: BoxDecoration(
+                                                  color: Colors.blue,
+                                                  borderRadius:
+                                                      BorderRadius.circular(27),
+                                                ),
+                                                child: const Center(
+                                                    child: Text(
+                                                  "View",
+                                                  style: TextStyle(
+                                                      color: Colors.white),
+                                                )),
+                                              ),
+                                            )
+                                          : InkWell(
+                                              onTap: () {
+                                                // toDetails();
+                                              },
+                                              child: Container(
+                                                height: 50,
+                                                decoration: BoxDecoration(
+                                                  color: Colors.blue,
+                                                  borderRadius:
+                                                      BorderRadius.circular(27),
+                                                ),
+                                                child: const Center(
+                                                  child: Text(
+                                                    "Edit",
+                                                    style: TextStyle(
+                                                        color: Colors.white),
+                                                  ),
+                                                ),
+                                              ),
+                                            )
+                                      : SlideAction(
+                                          onSubmit: () {
+                                            setState(() {
+                                              isHelpPressed = true;
+                                            });
+                                          },
+                                          outerColor: Colors.blue,
+                                          submittedIcon: const Icon(
+                                              Icons.handshake,
+                                              color: Colors.white),
+                                          animationDuration:
+                                              const Duration(milliseconds: 170),
                                           height: 50,
-                                          decoration: BoxDecoration(
-                                            color: Colors.blue,
-                                            borderRadius:
-                                                BorderRadius.circular(27),
-                                          ),
-                                          child: const Center(
-                                              child: Text(
-                                            "View",
-                                            style:
-                                                TextStyle(color: Colors.white),
-                                          )),
+                                          sliderButtonIconSize: 17,
+                                          sliderButtonIconPadding: 11,
+                                          text: "help",
+                                          textStyle: TextStyle(
+                                              fontSize: 12,
+                                              color: Colors.white
+                                                  .withOpacity(0.7)),
                                         ),
-                                      )
-                                    : InkWell(
-                                        onTap: () {
-                                          // toDetails();
-                                        },
-                                        child: Container(
-                                          height: 50,
-                                          decoration: BoxDecoration(
-                                            color: Colors.blue,
-                                            borderRadius:
-                                                BorderRadius.circular(27),
-                                          ),
-                                          child: const Center(
-                                            child: Text(
-                                              "Edit",
-                                              style: TextStyle(
-                                                  color: Colors.white),
-                                            ),
-                                          ),
-                                        ),
-                                      )
-                                : SlideAction(
-                                    onSubmit: () {
-                                      setState(() {
-                                        isHelpPressed = true;
-                                      });
-                                    },
-                                    outerColor: Colors.blue,
-                                    submittedIcon: const Icon(Icons.handshake,
-                                        color: Colors.white),
-                                    animationDuration:
-                                        const Duration(milliseconds: 170),
-                                    height: 50,
-                                    sliderButtonIconSize: 17,
-                                    sliderButtonIconPadding: 11,
-                                    text: "help",
-                                    textStyle: TextStyle(
-                                        fontSize: 12,
-                                        color: Colors.white.withOpacity(0.7)),
-                                  ),
-                          ),
+                                ),
                         ],
                       ),
                     ),
@@ -421,10 +428,12 @@ class _RequestTileState extends State<RequestTile> {
                 ],
               ),
             ),
-            const Divider(
-              color: Color(0xffEAEAEA),
-              thickness: 1,
-            ),
+            widget.tileLocation == "chat"
+                ? Container()
+                : const Divider(
+                    color: Color(0xffEAEAEA),
+                    thickness: 1,
+                  ),
             isHelpPressed
                 ? Row(
                     children: [

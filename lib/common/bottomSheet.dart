@@ -13,7 +13,7 @@ class CustomBottomSheet extends StatelessWidget {
     Size size = MediaQuery.of(context).size;
 
     return Container(
-      height: height ?? 0.4 * size.height,
+      height: height ?? 0.5 * size.height,
       width: size.longestSide,
       decoration: BoxDecoration(
         color: Colors.white,

@@ -10,10 +10,15 @@ import 'package:get_it/models/userModel.dart';
 import '../../main.dart';
 
 class RequestForm extends StatefulWidget {
-  const RequestForm(
-      {super.key, required this.userModel, required this.firebaseUser});
+  const RequestForm({
+    super.key,
+    required this.userModel,
+    required this.firebaseUser,
+    this.isitPersonalised,
+  });
   final UserModel userModel;
   final User firebaseUser;
+  final bool? isitPersonalised;
 
   @override
   State<RequestForm> createState() => _RequestFormState();
@@ -32,32 +37,44 @@ class _RequestFormState extends State<RequestForm> {
 
   TextEditingController threecontroller = TextEditingController();
   TextEditingController threequantitycontroller = TextEditingController();
+
+  bool sendtohelperonly = false;
+  @override
+  void initState() {
+    // TODO: implement initState
+    setState(() {
+      sendtohelperonly = widget.isitPersonalised ?? false;
+    });
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
 
     void createRequest() async {
       String requestUid = uuid.v1();
-
       if (getitBycontroller.text.isNotEmpty) {
         if (onecontroller.text.isNotEmpty) {
           if (onequantitycontroller.text.isNotEmpty) {
             if (pricecontroller.text.isNotEmpty) {
               RequestModel newRequest = RequestModel(
-                  requestUid: requestUid,
-                  getby: getitBycontroller.text,
-                  requestedBy: widget.userModel.fullname,
-                  requesterUid: widget.userModel.uid,
-                  requestedOn: DateTime.now(),
-                  price: pricecontroller.text,
-                  note: notecontroller.text.trim(),
-                  one: onecontroller.text.trim(),
-                  two: twocontroller.text.trim(),
-                  three: threecontroller.text.trim(),
-                  oneQuantity: onequantitycontroller.text.trim(),
-                  twoQuantity: twoQuantitycontroller.text.trim(),
-                  threeQuantity: threequantitycontroller.text.trim(),
-                  status: "pending");
+                requestUid: requestUid,
+                getby: getitBycontroller.text,
+                requestedBy: widget.userModel.fullname,
+                requesterUid: widget.userModel.uid,
+                requestedOn: DateTime.now(),
+                price: pricecontroller.text,
+                note: notecontroller.text.trim(),
+                one: onecontroller.text.trim(),
+                two: twocontroller.text.trim(),
+                three: threecontroller.text.trim(),
+                oneQuantity: onequantitycontroller.text.trim(),
+                twoQuantity: twoQuantitycontroller.text.trim(),
+                threeQuantity: threequantitycontroller.text.trim(),
+                status: "pending",
+                personalised: sendtohelperonly,
+              );
               FirebaseFirestore.instance
                   .collection("College")
                   .doc(widget.userModel.college)
@@ -227,6 +244,26 @@ class _RequestFormState extends State<RequestForm> {
                 tiptool:
                     "Enter the price you are willing to pay for the requested items. :D",
               ),
+              widget.isitPersonalised ?? false
+                  ? Row(
+                      children: [
+                        const Text(
+                          "Send request on global too",
+                          style: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              color: Color(0xff385585)),
+                        ),
+                        Checkbox(
+                          value: !sendtohelperonly,
+                          onChanged: (value) {
+                            setState(() {
+                              sendtohelperonly = !sendtohelperonly;
+                            });
+                          },
+                        ),
+                      ],
+                    )
+                  : Container(),
               InkWell(
                 onTap: () {
                   createRequest();

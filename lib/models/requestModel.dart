@@ -13,6 +13,7 @@ class RequestModel {
   String? getby;
   String? price;
   String? status;
+  bool? personalised;
 
   RequestModel(
       {this.requestUid,
@@ -28,7 +29,8 @@ class RequestModel {
       this.threeQuantity,
       this.getby,
       this.price,
-      this.status});
+      this.status,
+      this.personalised});
 
   RequestModel.fromMap(Map<String, dynamic> map) {
     requestUid = map["requestUid"];
@@ -45,6 +47,7 @@ class RequestModel {
     getby = map["getby"];
     price = map["price"];
     status = map["status"];
+    personalised = map["personalised"];
   }
 
   Map<String, dynamic> toMap() {
@@ -63,6 +66,7 @@ class RequestModel {
       "getby": getby,
       "price": price,
       "status": status,
+      "personalised": personalised,
     };
   }
 }

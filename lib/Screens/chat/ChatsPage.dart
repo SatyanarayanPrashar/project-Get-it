@@ -1,9 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/Screens/chat/chatroom.dart';
 import 'package:get_it/models/chatRoomModel.dart';
 import 'package:get_it/models/firebaseHelper.dart';
+import 'package:get_it/models/requestModel.dart';
 import 'package:get_it/models/userModel.dart';
 
 class ChatPage extends StatefulWidget {
@@ -35,7 +37,7 @@ class _ChatPageState extends State<ChatPage> {
                 .collection("chatrooms")
                 .where("participants.${widget.loggedinUserModel.uid}",
                     isEqualTo: true)
-                .orderBy("createdon", descending: true)
+                // .orderBy("createdon", descending: true)
                 .snapshots(),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.active) {
@@ -59,39 +61,65 @@ class _ChatPageState extends State<ChatPage> {
                             participantsKeys[0],
                             widget.loggedinUserModel.college),
                         builder: (context, userData) {
-                          if (userData.connectionState ==
-                              ConnectionState.done) {
-                            if (userData.data != null) {
-                              UserModel targetUser = userData.data as UserModel;
-                              return ListTile(
-                                onTap: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) {
-                                        return ChatScreen(
-                                          targetUser: targetUser,
-                                          userModel: widget.loggedinUserModel,
-                                          firebaseUser: widget.firebaseUser,
-                                          chatRoomModel: chatRoomModel,
+                          return FutureBuilder(
+                              future: FirebaseHelper.getReqModelById(
+                                  chatRoomModel.requestid ?? ""),
+                              builder: (context, requestData) {
+                                if (requestData.connectionState ==
+                                    ConnectionState.done) {
+                                  if (requestData.data != null) {
+                                    RequestModel requestModel =
+                                        requestData.data as RequestModel;
+                                    if (userData.connectionState ==
+                                        ConnectionState.done) {
+                                      if (userData.data != null) {
+                                        UserModel targetUser =
+                                            userData.data as UserModel;
+                                        return ListTile(
+                                          onTap: () {
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) {
+                                                  return ChatScreen(
+                                                    accessedFrom: "inbox",
+                                                    requestModel: requestModel,
+                                                    targetUser: targetUser,
+                                                    userModel: widget
+                                                        .loggedinUserModel,
+                                                    firebaseUser:
+                                                        widget.firebaseUser,
+                                                    chatRoomModel:
+                                                        chatRoomModel,
+                                                  );
+                                                },
+                                              ),
+                                            );
+                                          },
+                                          leading: const CircleAvatar(
+                                            backgroundColor: Colors.yellow,
+                                          ),
+                                          title: Text(
+                                              targetUser.fullname.toString()),
+                                          subtitle: Text(chatRoomModel
+                                              .lastMessage
+                                              .toString()),
                                         );
-                                      },
-                                    ),
+                                      } else {
+                                        return Container();
+                                      }
+                                    } else {
+                                      return Container();
+                                    }
+                                  } else {
+                                    return Container();
+                                  }
+                                } else {
+                                  return const Center(
+                                    child: CircularProgressIndicator(),
                                   );
-                                },
-                                leading: const CircleAvatar(
-                                  backgroundColor: Colors.yellow,
-                                ),
-                                title: Text(targetUser.fullname.toString()),
-                                subtitle:
-                                    Text(chatRoomModel.lastMessage.toString()),
-                              );
-                            } else {
-                              return Container();
-                            }
-                          } else {
-                            return Container();
-                          }
+                                }
+                              });
                         },
                       );
                     },

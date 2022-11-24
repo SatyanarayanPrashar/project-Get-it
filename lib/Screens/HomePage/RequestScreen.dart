@@ -36,6 +36,7 @@ class _RequestScreenState extends State<RequestScreen> {
             .doc(widget.userModel.college)
             .collection("requests")
             .orderBy("requestedOn", descending: true)
+            .where("personalised", isEqualTo: false)
             .get()
         : await FirebaseFirestore.instance
             .collection("College")
@@ -76,53 +77,70 @@ class _RequestScreenState extends State<RequestScreen> {
                       requestList = fetchRequests();
                     });
                   },
-                  child: ListView.builder(
-                    itemCount: requestSnapshot.docs.length,
-                    itemBuilder: (context, index) {
-                      RequestModel currentRequest = RequestModel.fromMap(
-                          requestSnapshot.docs[index].data()
-                              as Map<String, dynamic>);
+                  child: requestSnapshot.docs.length == 0
+                      ? Column(
+                          children: [
+                            Row(),
+                            Container(
+                              height: 250,
+                              width: 250,
+                              decoration: const BoxDecoration(
+                                image: DecorationImage(
+                                  image: AssetImage("assets/Images/auth.jpg"),
+                                ),
+                              ),
+                            ),
+                            Text("No requests Yet!")
+                          ],
+                        )
+                      : ListView.builder(
+                          itemCount: requestSnapshot.docs.length,
+                          itemBuilder: (context, index) {
+                            RequestModel currentRequest = RequestModel.fromMap(
+                                requestSnapshot.docs[index].data()
+                                    as Map<String, dynamic>);
 
-                      return Column(
-                        children: [
-                          RequestTile(
-                            isOnHome: true,
-                            requestUid: currentRequest.requestUid,
-                            isUserPost: currentRequest.requestedBy ==
-                                widget.userModel.fullname,
-                            requestedby: currentRequest.requestedBy,
-                            note: currentRequest.note,
-                            one: currentRequest.one,
-                            oneQuantity: currentRequest.oneQuantity,
-                            two: currentRequest.two,
-                            twoQuantity: currentRequest.twoQuantity,
-                            three: currentRequest.three,
-                            threeQuantity: currentRequest.threeQuantity,
-                            getitBy: currentRequest.getby,
-                            price: currentRequest.price,
-                            requestedon:
-                                currentRequest.requestedOn ?? DateTime.now(),
-                            refresh: () {
-                              print("refresh pressed");
-                              setState(() {
-                                print("refresh in process");
-                                requestList = fetchRequests();
-                                print("refreshed");
-                              });
-                            },
-                            loggedUserModel: widget.userModel,
-                            firebaseUser: widget.firebaseUser,
-                          ),
-                          index == requestSnapshot.docs.length - 1
-                              ? const Padding(
-                                  padding: EdgeInsets.only(bottom: 11),
-                                  child: Text("No more requests avialable"),
-                                )
-                              : Container(),
-                        ],
-                      );
-                    },
-                  ),
+                            return Column(
+                              children: [
+                                RequestTile(
+                                  tileLocation: "homepg",
+                                  requestUid: currentRequest.requestUid,
+                                  isUserPost: currentRequest.requestedBy ==
+                                      widget.userModel.fullname,
+                                  requestedby: currentRequest.requestedBy,
+                                  note: currentRequest.note,
+                                  one: currentRequest.one,
+                                  oneQuantity: currentRequest.oneQuantity,
+                                  two: currentRequest.two,
+                                  twoQuantity: currentRequest.twoQuantity,
+                                  three: currentRequest.three,
+                                  threeQuantity: currentRequest.threeQuantity,
+                                  getitBy: currentRequest.getby,
+                                  price: currentRequest.price,
+                                  requestedon: currentRequest.requestedOn ??
+                                      DateTime.now(),
+                                  refresh: () {
+                                    print("refresh pressed");
+                                    setState(() {
+                                      print("refresh in process");
+                                      requestList = fetchRequests();
+                                      print("refreshed");
+                                    });
+                                  },
+                                  loggedUserModel: widget.userModel,
+                                  firebaseUser: widget.firebaseUser,
+                                ),
+                                index == requestSnapshot.docs.length - 1
+                                    ? const Padding(
+                                        padding: EdgeInsets.only(bottom: 11),
+                                        child:
+                                            Text("No more requests avialable"),
+                                      )
+                                    : Container(),
+                              ],
+                            );
+                          },
+                        ),
                 );
               } else if (snapshot.hasError) {
                 return const Center(

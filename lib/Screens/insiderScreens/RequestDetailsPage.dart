@@ -6,11 +6,13 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/Screens/HomePage/requestTile.dart';
 import 'package:get_it/Screens/chat/chatroom.dart';
+import 'package:get_it/common/custom_confirmation_dialog.dart';
 import 'package:get_it/main.dart';
 import 'package:get_it/models/chatRoomModel.dart';
 import 'package:get_it/models/comment.dart';
 import 'package:get_it/models/firebaseHelper.dart';
 import 'package:get_it/models/localStorage.dart';
+import 'package:get_it/models/messageModel.dart';
 import 'package:get_it/models/requestModel.dart';
 import 'package:get_it/models/userModel.dart';
 import 'package:slide_to_act/slide_to_act.dart';
@@ -111,7 +113,7 @@ class _RequestDetailPageState extends State<RequestDetailPage> {
                                   ? Column(
                                       children: [
                                         RequestTile(
-                                          isOnHome: false,
+                                          tileLocation: "detailpg",
                                           requestUid:
                                               widget.requestModel.requestUid,
                                           isUserPost: widget.isUserPost,
@@ -185,7 +187,7 @@ class _RequestDetailPageState extends State<RequestDetailPage> {
                         : Column(
                             children: [
                               RequestTile(
-                                isOnHome: false,
+                                tileLocation: "detailpg",
                                 requestUid: widget.requestModel.requestUid,
                                 isUserPost: widget.isUserPost,
                                 requestedby: widget.requestModel.requestedBy,
@@ -235,7 +237,6 @@ class commentTile extends StatefulWidget {
   final String? helperId;
   final UserModel loggedUserModel;
   final User firebaseUsser;
-
   final DateTime? commentedOn;
   final String? time;
   final String? note;
@@ -274,11 +275,20 @@ class _commentTileState extends State<commentTile> {
       ChatRoomModel existingChatroom =
           ChatRoomModel.fromMap(docData as Map<String, dynamic>);
       chatRoom = existingChatroom;
+
+      FirebaseFirestore.instance
+          .collection("College")
+          .doc(widget.loggedUserModel.college)
+          .collection("chatrooms")
+          .doc(chatRoom.chatroomid)
+          .update({"chatClosed": false}).then(
+              (value) => print(chatRoom?.chatClosed));
     } else {
       // create
       ChatRoomModel newChatroom = ChatRoomModel(
         chatroomid: uuid.v1(),
         lastMessage: "",
+        requestid: widget.requestModel.requestUid,
         chatClosed: false,
         createdon: DateTime.now(),
         participants: {
@@ -381,31 +391,42 @@ class _commentTileState extends State<commentTile> {
                         ? Flexible(
                             child: SlideAction(
                               onSubmit: () async {
-                                UserModel? targetModel =
-                                    await FirebaseHelper.getUserModelById(
-                                        widget.helperId ?? "",
-                                        widget.loggedUserModel.college);
+                                showConfirmationDialog(
+                                    context: context,
+                                    message: "Go to chat and discuss :D",
+                                    onPress: () async {
+                                      Navigator.pop(context);
+                                      UserModel? targetModel =
+                                          await FirebaseHelper.getUserModelById(
+                                              widget.helperId ?? "",
+                                              widget.loggedUserModel.college);
 
-                                ChatRoomModel? chatroomModel =
-                                    await getChatRoomModel(
-                                        targetModel ?? widget.loggedUserModel);
+                                      ChatRoomModel? chatroomModel =
+                                          await getChatRoomModel(targetModel ??
+                                              widget.loggedUserModel);
 
-                                if (chatroomModel != null) {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) {
-                                        return ChatScreen(
-                                          targetUser: targetModel ??
-                                              widget.loggedUserModel,
-                                          userModel: widget.loggedUserModel,
-                                          firebaseUser: widget.firebaseUsser,
-                                          chatRoomModel: chatroomModel,
+                                      if (chatroomModel != null) {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) {
+                                              return ChatScreen(
+                                                accessedFrom: "request",
+                                                targetUser: targetModel ??
+                                                    widget.loggedUserModel,
+                                                userModel:
+                                                    widget.loggedUserModel,
+                                                firebaseUser:
+                                                    widget.firebaseUsser,
+                                                chatRoomModel: chatroomModel,
+                                                requestModel:
+                                                    widget.requestModel,
+                                              );
+                                            },
+                                          ),
                                         );
-                                      },
-                                    ),
-                                  );
-                                }
+                                      }
+                                    });
                               },
                               outerColor: const Color(0xffA6BBDE),
                               submittedIcon: const Icon(Icons.handshake,

@@ -3,6 +3,7 @@ import 'package:expandable_text/expandable_text.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/Screens/insiderScreens/HelperForm.dart';
+import 'package:get_it/Screens/insiderScreens/RequestFormPage.dart';
 import 'package:get_it/models/helperModel.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import 'package:get_it/models/userModel.dart';
@@ -49,7 +50,7 @@ class _HelpersScreenState extends State<HelpersScreen> {
           }));
         },
         backgroundColor: Colors.blue,
-        child: Icon(Icons.add),
+        child: const Icon(Icons.add),
       ),
       body: Padding(
         padding: const EdgeInsets.only(left: 16, right: 16),
@@ -76,6 +77,8 @@ class _HelpersScreenState extends State<HelpersScreen> {
                         return Column(
                           children: [
                             HelperTile(
+                              userModel: widget.userModel,
+                              firebaseUser: widget.firebaseUser,
                               requestedon:
                                   currentHelper.requestedOn ?? DateTime.now(),
                               avilableon: currentHelper.helpOn ?? "NA :(",
@@ -122,7 +125,11 @@ class HelperTile extends StatelessWidget {
       required this.requestedon,
       this.note,
       this.avilableon,
-      required this.helperUid});
+      required this.helperUid,
+      required this.userModel,
+      required this.firebaseUser});
+  final UserModel userModel;
+  final User firebaseUser;
   final bool? isUserHelper;
   final String? helperName;
   final String? helperUid;
@@ -135,7 +142,7 @@ class HelperTile extends StatelessWidget {
     Size size = MediaQuery.of(context).size;
 
     return Container(
-      margin: EdgeInsets.only(bottom: 7),
+      margin: const EdgeInsets.only(bottom: 7),
       width: size.width,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -215,11 +222,14 @@ class HelperTile extends StatelessWidget {
                     ? Flexible(
                         child: SlideAction(
                           onSubmit: () {
-                            // Navigator.push(context,
-                            //     MaterialPageRoute(
-                            //         builder: (context) {
-                            //   return RequestDetailPage();
-                            // }));
+                            Navigator.push(context,
+                                MaterialPageRoute(builder: (context) {
+                              return RequestForm(
+                                userModel: userModel,
+                                firebaseUser: firebaseUser,
+                                isitPersonalised: true,
+                              );
+                            }));
                           },
                           outerColor: Colors.blue,
                           submittedIcon:

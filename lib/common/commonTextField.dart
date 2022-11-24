@@ -47,15 +47,15 @@ class commonTextField extends StatelessWidget {
                       ? Padding(
                           padding: const EdgeInsets.only(bottom: 7, left: 17),
                           child: Tooltip(
-                            showDuration: Duration(seconds: 4),
+                            showDuration: const Duration(seconds: 4),
                             message: tiptool ?? "",
                             triggerMode: TooltipTriggerMode.tap,
-                            margin: EdgeInsets.fromLTRB(16, 0, 16, 0),
-                            padding: EdgeInsets.all(14),
+                            margin: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+                            padding: const EdgeInsets.all(14),
                             decoration: BoxDecoration(
-                                color: Color(0xffA6BBDE),
+                                color: const Color(0xffA6BBDE),
                                 borderRadius: BorderRadius.circular(17)),
-                            child: Icon(
+                            child: const Icon(
                               Icons.info_outline_rounded,
                               color: Color(0xff385585),
                               size: 18,
@@ -69,7 +69,7 @@ class commonTextField extends StatelessWidget {
           padding: const EdgeInsets.only(bottom: 20),
           child: Material(
             elevation: 10,
-            shadowColor: Color(0xff17056EAC),
+            shadowColor: const Color(0xff17056EAC),
             child: SizedBox(
               width: length ?? size.width,
               child: TextField(
@@ -86,7 +86,8 @@ class commonTextField extends StatelessWidget {
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(5.0),
                     borderSide: BorderSide(
-                        color: Color(0xff17056EAC).withOpacity(0.1), width: 1),
+                        color: const Color(0xff17056EAC).withOpacity(0.1),
+                        width: 1),
                   ),
                 ),
               ),
