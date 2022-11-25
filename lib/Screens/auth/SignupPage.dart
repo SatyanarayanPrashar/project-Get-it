@@ -142,18 +142,18 @@ class _SignupPageState extends State<SignupPage> {
                   ),
                 ),
               ),
-              Padding(
-                padding: const EdgeInsets.only(top: 16),
-                child: InkWell(
-                  onTap: () {
-                    // Authentication here
-                    print("tapped");
-                  },
-                  child: const Button(
-                      buttonText:
-                          "For seamless one-tap Sign Up, please use your Google account to continue."),
-                ),
-              ),
+              // Padding(
+              //   padding: const EdgeInsets.only(top: 16),
+              //   child: InkWell(
+              //     onTap: () {
+              //       // Authentication here
+              //       print("tapped");
+              //     },
+              //     child: const Button(
+              //         buttonText:
+              //             "For seamless one-tap Sign Up, please use your Google account to continue."),
+              //   ),
+              // ),
               const SizedBox(height: 57),
               const Text("Already have an account?"),
               InkWell(

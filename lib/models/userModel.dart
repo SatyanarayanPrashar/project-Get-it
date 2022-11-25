@@ -24,7 +24,7 @@ class UserModel {
     email = map["email"];
     college = map["college"];
     profilepic = map["profilepic"];
-    idCard = map["idcard"];
+    idCard = map["idCard"];
     batch = map["batch"];
     branch = map["branch"];
   }

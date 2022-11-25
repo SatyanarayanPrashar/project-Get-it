@@ -50,7 +50,7 @@ class _RequestDetailPageState extends State<RequestDetailPage> {
         .collection("College")
         .doc(college)
         .collection("requests")
-        .doc(widget.requestModel.requestUid)
+        .doc(widget.requestModel.requestid)
         .collection("comments")
         .orderBy("commentedOn", descending: true)
         .get();
@@ -66,7 +66,7 @@ class _RequestDetailPageState extends State<RequestDetailPage> {
         .collection("College")
         .doc(currentCollege)
         .collection("Chats")
-        .doc()
+        .doc(chatid)
         .get();
     ChatRoomModel chatRoomModel =
         ChatRoomModel.fromMap(chatData.data() as Map<String, dynamic>);
@@ -114,8 +114,10 @@ class _RequestDetailPageState extends State<RequestDetailPage> {
                                       children: [
                                         RequestTile(
                                           tileLocation: "detailpg",
-                                          requestUid:
-                                              widget.requestModel.requestUid,
+                                          requestid:
+                                              widget.requestModel.requestid,
+                                          profilePic: widget
+                                              .requestModel.requesterProfilePic,
                                           isUserPost: widget.isUserPost,
                                           requestedby:
                                               widget.requestModel.requestedBy,
@@ -139,6 +141,8 @@ class _RequestDetailPageState extends State<RequestDetailPage> {
                                           firebaseUser: widget.firebaseUser,
                                         ),
                                         commentTile(
+                                          helperProfilePic:
+                                              currentHelp.helperProfilePic,
                                           helperName: currentHelp.commentBy,
                                           loggedUserModel:
                                               widget.loggedUserModel,
@@ -164,6 +168,8 @@ class _RequestDetailPageState extends State<RequestDetailPage> {
                                         commentTile(
                                           loggedUserModel:
                                               widget.loggedUserModel,
+                                          helperProfilePic:
+                                              currentHelp.helperProfilePic,
                                           firebaseUsser: widget.firebaseUser,
                                           helperName: currentHelp.commentBy,
                                           time: currentHelp.timing,
@@ -188,7 +194,9 @@ class _RequestDetailPageState extends State<RequestDetailPage> {
                             children: [
                               RequestTile(
                                 tileLocation: "detailpg",
-                                requestUid: widget.requestModel.requestUid,
+                                requestid: widget.requestModel.requestid,
+                                profilePic:
+                                    widget.requestModel.requesterProfilePic,
                                 isUserPost: widget.isUserPost,
                                 requestedby: widget.requestModel.requestedBy,
                                 note: widget.requestModel.note,
@@ -235,6 +243,7 @@ class _RequestDetailPageState extends State<RequestDetailPage> {
 class commentTile extends StatefulWidget {
   final String? helperName;
   final String? helperId;
+  final String? helperProfilePic;
   final UserModel loggedUserModel;
   final User firebaseUsser;
   final DateTime? commentedOn;
@@ -252,6 +261,7 @@ class commentTile extends StatefulWidget {
     this.helperId,
     required this.loggedUserModel,
     required this.firebaseUsser,
+    this.helperProfilePic,
   });
 
   @override
@@ -288,7 +298,7 @@ class _commentTileState extends State<commentTile> {
       ChatRoomModel newChatroom = ChatRoomModel(
         chatroomid: uuid.v1(),
         lastMessage: "",
-        requestid: widget.requestModel.requestUid,
+        requestid: widget.requestModel.requestid,
         chatClosed: false,
         createdon: DateTime.now(),
         participants: {
@@ -320,9 +330,11 @@ class _commentTileState extends State<commentTile> {
           Row(
             children: [
               // Avatar , about and options
-              const CircleAvatar(
+              CircleAvatar(
                 radius: 20,
-                backgroundImage: AssetImage("assets/Images/praposalHome.png"),
+                backgroundImage: NetworkImage(widget.helperProfilePic ??
+                    "https://firebasestorage.googleapis.com/v0/b/get-it-8a8a7.appspot.com/o/profilepictures%2FpraposalHome.png?alt=media&token=6ea273da-f64b-4c30-b6ef-7770d8ac6b82"),
+                // onBackgroundImageError: AssetImage("assets/Images/praposalHome.png"),
               ),
               const SizedBox(
                 width: 7,

@@ -172,18 +172,18 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                 ),
               ),
-              Padding(
-                padding: const EdgeInsets.only(top: 16),
-                child: InkWell(
-                  onTap: () {
-                    // Authentication here
-                    print("tapped");
-                  },
-                  child: const Button(
-                      buttonText:
-                          "For seamless one-tap logins, please use your Google account to continue."),
-                ),
-              ),
+              // Padding(
+              //   padding: const EdgeInsets.only(top: 16),
+              //   child: InkWell(
+              //     onTap: () {
+              //       // Authentication here
+              //       print("tapped");
+              //     },
+              //     child: const Button(
+              //         buttonText:
+              //             "For seamless one-tap logins, please use your Google account to continue."),
+              //   ),
+              // ),
               Padding(
                 padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
                 child: TextButton(

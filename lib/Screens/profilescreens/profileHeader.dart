@@ -77,8 +77,7 @@ class profileHeader extends StatelessWidget {
                 Row(
                   children: [
                     CircleAvatar(
-                      backgroundImage:
-                          const AssetImage("assets/Images/praposalHome.png"),
+                      backgroundImage: NetworkImage(userModel.profilepic ?? ""),
                       radius: size.width * 0.1,
                     ),
                     SizedBox(

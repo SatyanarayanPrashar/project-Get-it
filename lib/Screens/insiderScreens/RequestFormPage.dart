@@ -56,10 +56,11 @@ class _RequestFormState extends State<RequestForm> {
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
-    String requestUid = uuid.v1();
+    String requestid = uuid.v1();
 
     Future<ChatRoomModel?> getChatRoomModel(UserModel targetUser) async {
       ChatRoomModel? chatRoom;
+
       QuerySnapshot snapshot = await FirebaseFirestore.instance
           .collection("College")
           .doc(widget.userModel.college)
@@ -68,7 +69,7 @@ class _RequestFormState extends State<RequestForm> {
           .where("participants.${targetUser.uid}", isEqualTo: true)
           .get();
 
-      if (snapshot.docs.length > 0) {
+      if (snapshot.docs.isNotEmpty) {
         // fetch
         var docData = snapshot.docs[0].data();
         ChatRoomModel existingChatroom =
@@ -80,14 +81,13 @@ class _RequestFormState extends State<RequestForm> {
             .doc(widget.userModel.college)
             .collection("chatrooms")
             .doc(chatRoom.chatroomid)
-            .update({"chatClosed": false}).then(
-                (value) => print(chatRoom?.chatClosed));
+            .update({"chatClosed": false});
       } else {
         // create
         ChatRoomModel newChatroom = ChatRoomModel(
           chatroomid: uuid.v1(),
           lastMessage: "",
-          requestid: requestUid,
+          requestid: requestid,
           chatClosed: false,
           createdon: DateTime.now(),
           participants: {
@@ -106,20 +106,16 @@ class _RequestFormState extends State<RequestForm> {
       return chatRoom;
     }
 
-    void createRequest() async {
-      UserModel? targetModel = await FirebaseHelper.getUserModelById(
-          widget.helperUid, widget.userModel.college);
-      ChatRoomModel? chatroomModel =
-          await getChatRoomModel(targetModel ?? widget.userModel);
-
+    void createRequestfromHome() async {
       if (getitBycontroller.text.isNotEmpty) {
         if (onecontroller.text.isNotEmpty) {
           if (onequantitycontroller.text.isNotEmpty) {
             if (pricecontroller.text.isNotEmpty) {
               RequestModel newRequest = RequestModel(
-                requestUid: requestUid,
+                requestid: requestid,
                 getby: getitBycontroller.text,
                 requestedBy: widget.userModel.fullname,
+                requesterProfilePic: widget.userModel.profilepic,
                 requesterUid: widget.userModel.uid,
                 requestedOn: DateTime.now(),
                 price: pricecontroller.text,
@@ -137,14 +133,102 @@ class _RequestFormState extends State<RequestForm> {
                   .collection("College")
                   .doc(widget.userModel.college)
                   .collection("requests")
-                  .doc(requestUid)
+                  .doc(requestid)
                   .set(newRequest.toMap())
                   .then((value) {
-                FirebaseFirestore.instance
-                    .collection("College")
-                    .doc(widget.userModel.college)
-                    .update({"requestCount": FieldValue.increment(1)});
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) {
+                      return bottomNav(
+                        userModel: widget.userModel,
+                        firebaseUser: widget.firebaseUser,
+                      );
+                    },
+                  ),
+                );
+              });
+            } else {
+              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                content: Actionmessage(
+                  message: 'Please enter the price you can offer!',
+                ),
+                duration: Duration(seconds: 2),
+                behavior: SnackBarBehavior.floating,
+                elevation: 0,
+                backgroundColor: Colors.transparent,
+              ));
+            }
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+              content: Actionmessage(
+                message: 'Please enter item ones quantity!',
+              ),
+              duration: Duration(seconds: 2),
+              behavior: SnackBarBehavior.floating,
+              elevation: 0,
+              backgroundColor: Colors.transparent,
+            ));
+          }
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+            content: Actionmessage(
+              message: 'Please enter the item 1!',
+            ),
+            duration: Duration(seconds: 2),
+            behavior: SnackBarBehavior.floating,
+            elevation: 0,
+            backgroundColor: Colors.transparent,
+          ));
+        }
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Actionmessage(
+            message: 'Please enter get it by!',
+          ),
+          duration: Duration(seconds: 2),
+          behavior: SnackBarBehavior.floating,
+          elevation: 0,
+          backgroundColor: Colors.transparent,
+        ));
+      }
+    }
 
+    void createRequest() async {
+      UserModel? targetModel = await FirebaseHelper.getUserModelById(
+          widget.helperUid, widget.userModel.college);
+      ChatRoomModel? chatroomModel =
+          await getChatRoomModel(targetModel ?? widget.userModel);
+
+      if (getitBycontroller.text.isNotEmpty) {
+        if (onecontroller.text.isNotEmpty) {
+          if (onequantitycontroller.text.isNotEmpty) {
+            if (pricecontroller.text.isNotEmpty) {
+              RequestModel newRequest = RequestModel(
+                requestid: requestid,
+                getby: getitBycontroller.text,
+                requestedBy: widget.userModel.fullname,
+                requesterProfilePic: widget.userModel.profilepic,
+                requesterUid: widget.userModel.uid,
+                requestedOn: DateTime.now(),
+                price: pricecontroller.text,
+                note: notecontroller.text.trim(),
+                one: onecontroller.text.trim(),
+                two: twocontroller.text.trim(),
+                three: threecontroller.text.trim(),
+                oneQuantity: onequantitycontroller.text.trim(),
+                twoQuantity: twoQuantitycontroller.text.trim(),
+                threeQuantity: threequantitycontroller.text.trim(),
+                status: "pending",
+                personalised: sendtohelperonly,
+              );
+              FirebaseFirestore.instance
+                  .collection("College")
+                  .doc(widget.userModel.college)
+                  .collection("requests")
+                  .doc(requestid)
+                  .set(newRequest.toMap())
+                  .then((value) {
                 widget.isitPersonalised ?? false
                     ? chatroomModel != null
                         ? Navigator.push(
@@ -163,13 +247,28 @@ class _RequestFormState extends State<RequestForm> {
                             ),
                           )
                         : print("failed")
-                    : Navigator.pushReplacement(context,
-                        MaterialPageRoute(builder: (context) {
-                        return bottomNav(
-                          userModel: widget.userModel,
-                          firebaseUser: widget.firebaseUser,
-                        );
-                      }));
+                    : Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) {
+                            return bottomNav(
+                              userModel: widget.userModel,
+                              firebaseUser: widget.firebaseUser,
+                            );
+                          },
+                        ),
+                      );
+                // Navigator.pushReplacement(
+                //   context,
+                //   MaterialPageRoute(
+                //     builder: (context) {
+                //       return bottomNav(
+                //         userModel: widget.userModel,
+                //         firebaseUser: widget.firebaseUser,
+                //       );
+                //     },
+                //   ),
+                // );
               });
             } else {
               ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
@@ -342,7 +441,9 @@ class _RequestFormState extends State<RequestForm> {
                   : Container(),
               InkWell(
                 onTap: () {
-                  createRequest();
+                  widget.isitPersonalised ?? false
+                      ? createRequest()
+                      : createRequestfromHome();
                 },
                 child: Container(
                   width: size.width,

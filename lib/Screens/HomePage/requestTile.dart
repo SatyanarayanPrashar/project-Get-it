@@ -19,6 +19,7 @@ import 'package:timeago/timeago.dart' as timeago;
 class RequestTile extends StatefulWidget {
   final bool? isUserPost;
   final String? tileLocation;
+
   final String? requestedby;
   final DateTime requestedon;
   final String? one;
@@ -30,7 +31,8 @@ class RequestTile extends StatefulWidget {
   final String? getitBy;
   final String? price;
   final String? note;
-  final String? requestUid;
+  final String? requestid;
+  final String? profilePic;
   final UserModel loggedUserModel;
   final User firebaseUser;
   final void Function()? refresh;
@@ -48,12 +50,13 @@ class RequestTile extends StatefulWidget {
     this.getitBy,
     this.price,
     this.note,
-    this.requestUid,
+    this.requestid,
     this.refresh,
     this.isUserPost,
     this.tileLocation,
     required this.loggedUserModel,
     required this.firebaseUser,
+    this.profilePic,
   });
 
   @override
@@ -72,7 +75,7 @@ class _RequestTileState extends State<RequestTile> {
         .collection("College")
         .doc(currentCollege)
         .collection("requests")
-        .doc(widget.requestUid)
+        .doc(widget.requestid)
         .delete()
         .then((value) {
       Navigator.pop(context);
@@ -97,7 +100,7 @@ class _RequestTileState extends State<RequestTile> {
           .collection("College")
           .doc(currentCollege)
           .collection("requests")
-          .doc(widget.requestUid)
+          .doc(widget.requestid)
           .collection("comments")
           .doc(commentId)
           .set(newComment.toMap())
@@ -128,7 +131,7 @@ class _RequestTileState extends State<RequestTile> {
         .collection("College")
         .doc(currentCollege)
         .collection("requests")
-        .doc(widget.requestUid)
+        .doc(widget.requestid)
         .get();
     RequestModel requestModel =
         RequestModel.fromMap(userData.data() as Map<String, dynamic>);
@@ -161,10 +164,9 @@ class _RequestTileState extends State<RequestTile> {
                 : Row(
                     children: [
                       // Avatar , about and options
-                      const CircleAvatar(
+                      CircleAvatar(
                         radius: 20,
-                        backgroundImage:
-                            AssetImage("assets/Images/praposalHome.png"),
+                        backgroundImage: NetworkImage(widget.profilePic ?? ""),
                       ),
                       const SizedBox(
                         width: 7,
@@ -180,9 +182,7 @@ class _RequestTileState extends State<RequestTile> {
                             ),
                           ),
                           Text(
-                            widget.requestedon != null
-                                ? timeago.format(widget.requestedon)
-                                : "NA :(",
+                            timeago.format(widget.requestedon),
                             style: const TextStyle(
                               color: Colors.grey,
                               fontSize: 9,

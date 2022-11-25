@@ -2,6 +2,7 @@ class CommentModel {
   String? commentId;
   String? commentBy;
   String? helperId;
+  String? helperProfilePic;
   String? timing;
   DateTime? commentedOn;
   String? note;
@@ -9,6 +10,7 @@ class CommentModel {
   CommentModel({
     this.commentId,
     this.commentBy,
+    this.helperProfilePic,
     this.commentedOn,
     this.timing,
     this.helperId,
@@ -18,6 +20,7 @@ class CommentModel {
   CommentModel.fromMap(Map<String, dynamic> map) {
     commentId = map["commentId"];
     commentBy = map["commentby"];
+    helperProfilePic = map["helperProfilePic"];
     commentedOn = map["commentedOn"].toDate();
     timing = map["timing"];
     helperId = map["helperId"];
@@ -28,6 +31,7 @@ class CommentModel {
     return {
       "commentId": commentId,
       "commentby": commentBy,
+      "helperProfilePic": helperProfilePic,
       "helperId": helperId,
       "timing": timing,
       "commentedOn": commentedOn,

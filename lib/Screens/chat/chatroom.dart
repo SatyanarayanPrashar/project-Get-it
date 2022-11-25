@@ -92,7 +92,8 @@ class _ChatScreenState extends State<ChatScreen> {
                   padding: const EdgeInsets.only(right: 7),
                   child: CircleAvatar(
                     radius: 17,
-                    // backgroundColor: NetworkImage(widget.targetUser.profilepic.toString() ),
+                    backgroundImage:
+                        NetworkImage(widget.targetUser.profilepic ?? ""),
                   ),
                 ),
                 Flexible(
@@ -453,10 +454,13 @@ class _ChatScreenState extends State<ChatScreen> {
                                         Container(
                                           height: 0.5 * size.height,
                                           width: size.width,
-                                          decoration: const BoxDecoration(
-                                              image: DecorationImage(
-                                                  image: AssetImage(
-                                                      "assets/Images/auth.jpg"))),
+                                          decoration: BoxDecoration(
+                                            image: DecorationImage(
+                                              image: NetworkImage(widget
+                                                      .targetUser.idCard ??
+                                                  "https://firebasestorage.googleapis.com/v0/b/get-it-8a8a7.appspot.com/o/profilepictures%2FpraposalHome.png?alt=media&token=6ea273da-f64b-4c30-b6ef-7770d8ac6b82"),
+                                            ),
+                                          ),
                                         )
                                       ],
                                     ),

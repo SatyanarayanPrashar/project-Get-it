@@ -4,6 +4,7 @@ class HelperModel {
   String? helpUid;
   String? helpOn;
   String? note;
+  String? helperProfilePic;
   DateTime? requestedOn;
 
   HelperModel({
@@ -11,6 +12,7 @@ class HelperModel {
     this.helperUid,
     this.helpUid,
     this.helpOn,
+    this.helperProfilePic,
     this.note,
     this.requestedOn,
   });
@@ -20,6 +22,7 @@ class HelperModel {
     helperUid = map["helperUid"];
     helpUid = map["helpUid"];
     helpOn = map["helpOn"];
+    helperProfilePic = map["helperProfilePic"];
     note = map["note"];
     requestedOn = map["requestedOn"].toDate();
   }
@@ -28,6 +31,7 @@ class HelperModel {
     return {
       "helpby": helpBy,
       "helperUid": helperUid,
+      "helperProfilePic": helperProfilePic,
       "helpUid": helpUid,
       "helpOn": helpOn,
       "note": note,

@@ -1,7 +1,8 @@
 class RequestModel {
-  String? requestUid;
+  String? requestid;
   String? requestedBy;
   String? requesterUid;
+  String? requesterProfilePic;
   DateTime? requestedOn;
   String? note;
   String? one;
@@ -15,27 +16,30 @@ class RequestModel {
   String? status;
   bool? personalised;
 
-  RequestModel(
-      {this.requestUid,
-      this.requestedBy,
-      this.requesterUid,
-      this.requestedOn,
-      this.note,
-      this.one,
-      this.two,
-      this.three,
-      this.oneQuantity,
-      this.twoQuantity,
-      this.threeQuantity,
-      this.getby,
-      this.price,
-      this.status,
-      this.personalised});
+  RequestModel({
+    this.requestid,
+    this.requestedBy,
+    this.requesterUid,
+    this.requesterProfilePic,
+    this.requestedOn,
+    this.note,
+    this.one,
+    this.two,
+    this.three,
+    this.oneQuantity,
+    this.twoQuantity,
+    this.threeQuantity,
+    this.getby,
+    this.price,
+    this.status,
+    this.personalised,
+  });
 
   RequestModel.fromMap(Map<String, dynamic> map) {
-    requestUid = map["requestUid"];
+    requestid = map["requestid"];
     requestedBy = map["requestedby"];
     requesterUid = map["requestedUid"];
+    requesterProfilePic = map["requesterProfilePic"];
     requestedOn = map["requestedOn"].toDate();
     note = map["note"];
     one = map["one"];
@@ -52,8 +56,9 @@ class RequestModel {
 
   Map<String, dynamic> toMap() {
     return {
-      "requestUid": requestUid,
+      "requestid": requestid,
       "requestedby": requestedBy,
+      "requesterProfilePic": requesterProfilePic,
       "requesterUid": requesterUid,
       "requestedOn": requestedOn,
       "note": note,

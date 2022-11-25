@@ -105,7 +105,7 @@ class _RequestScreenState extends State<RequestScreen> {
                               children: [
                                 RequestTile(
                                   tileLocation: "homepg",
-                                  requestUid: currentRequest.requestUid,
+                                  requestid: currentRequest.requestid,
                                   isUserPost: currentRequest.requestedBy ==
                                       widget.userModel.fullname,
                                   requestedby: currentRequest.requestedBy,
@@ -130,6 +130,8 @@ class _RequestScreenState extends State<RequestScreen> {
                                   },
                                   loggedUserModel: widget.userModel,
                                   firebaseUser: widget.firebaseUser,
+                                  profilePic:
+                                      currentRequest.requesterProfilePic,
                                 ),
                                 index == requestSnapshot.docs.length - 1
                                     ? const Padding(

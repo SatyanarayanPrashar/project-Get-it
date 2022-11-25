@@ -34,6 +34,7 @@ class _HelperFormPageState extends State<HelperFormPage> {
           helperUid: widget.userModel.uid,
           helpUid: helpUid,
           helpOn: availablecontroller.text,
+          helperProfilePic: widget.userModel.profilepic,
           note: notecontroller.text,
           requestedOn: DateTime.now(),
         );

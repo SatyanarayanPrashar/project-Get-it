@@ -74,26 +74,45 @@ class _HelpersScreenState extends State<HelpersScreen> {
                             requestSnapshot.docs[index].data()
                                 as Map<String, dynamic>);
 
-                        return Column(
-                          children: [
-                            HelperTile(
-                              userModel: widget.userModel,
-                              firebaseUser: widget.firebaseUser,
-                              requestedon:
-                                  currentHelper.requestedOn ?? DateTime.now(),
-                              avilableon: currentHelper.helpOn ?? "NA :(",
-                              helperName: currentHelper.helpBy ?? "NA:(",
-                              helperUid: currentHelper.helperUid ?? "",
-                              note: currentHelper.note,
-                            ),
-                            index == requestSnapshot.docs.length - 1
-                                ? const Padding(
-                                    padding: EdgeInsets.only(bottom: 11),
-                                    child: Text("No more requests avialable"),
-                                  )
-                                : Container(),
-                          ],
-                        );
+                        return requestSnapshot.docs.length == 0
+                            ? Column(
+                                children: [
+                                  Row(),
+                                  Container(
+                                    height: 250,
+                                    width: 250,
+                                    decoration: const BoxDecoration(
+                                      image: DecorationImage(
+                                        image: AssetImage(
+                                            "assets/Images/auth.jpg"),
+                                      ),
+                                    ),
+                                  ),
+                                  Text("No Helpers Yet!")
+                                ],
+                              )
+                            : Column(
+                                children: [
+                                  HelperTile(
+                                    userModel: widget.userModel,
+                                    firebaseUser: widget.firebaseUser,
+                                    requestedon: currentHelper.requestedOn ??
+                                        DateTime.now(),
+                                    avilableon: currentHelper.helpOn ?? "NA :(",
+                                    helperName: currentHelper.helpBy ?? "NA:(",
+                                    helperUid: currentHelper.helperUid ?? "",
+                                    note: currentHelper.note,
+                                    profilepic: currentHelper.helperProfilePic,
+                                  ),
+                                  index == requestSnapshot.docs.length - 1
+                                      ? const Padding(
+                                          padding: EdgeInsets.only(bottom: 11),
+                                          child: Text(
+                                              "No more requests avialable"),
+                                        )
+                                      : Container(),
+                                ],
+                              );
                       },
                     ),
                   );
@@ -103,7 +122,7 @@ class _HelpersScreenState extends State<HelpersScreen> {
                   );
                 } else {
                   return const Center(
-                    child: Text("YOu have not requested anything yet:("),
+                    child: Text("You have not requested anything yet:("),
                   );
                 }
               } else {
@@ -127,13 +146,15 @@ class HelperTile extends StatelessWidget {
       this.avilableon,
       required this.helperUid,
       required this.userModel,
-      required this.firebaseUser});
+      required this.firebaseUser,
+      this.profilepic});
   final UserModel userModel;
   final User firebaseUser;
   final bool? isUserHelper;
   final String? helperName;
   final String? helperUid;
   final DateTime requestedon;
+  final String? profilepic;
   final String? note;
   final String? avilableon;
 
@@ -150,9 +171,9 @@ class HelperTile extends StatelessWidget {
           Row(
             children: [
               // Avatar , about and options
-              const CircleAvatar(
+              CircleAvatar(
                 radius: 20,
-                backgroundImage: AssetImage("assets/Images/praposalHome.png"),
+                backgroundImage: NetworkImage(profilepic ?? ""),
               ),
               const SizedBox(
                 width: 7,
