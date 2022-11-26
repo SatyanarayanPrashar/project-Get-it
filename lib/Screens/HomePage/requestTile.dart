@@ -379,26 +379,26 @@ class _RequestTileState extends State<RequestTile> {
                                                 )),
                                               ),
                                             )
-                                          : InkWell(
-                                              onTap: () {
-                                                // toDetails();
-                                              },
-                                              child: Container(
-                                                height: 50,
-                                                decoration: BoxDecoration(
-                                                  color: Colors.blue,
-                                                  borderRadius:
-                                                      BorderRadius.circular(27),
-                                                ),
-                                                child: const Center(
-                                                  child: Text(
-                                                    "Edit",
-                                                    style: TextStyle(
-                                                        color: Colors.white),
-                                                  ),
-                                                ),
-                                              ),
-                                            )
+                                          : Container() // : InkWell(
+                                      //     onTap: () {
+                                      //       // toDetails();
+                                      //     },
+                                      //     child: Container(
+                                      //       height: 50,
+                                      //       decoration: BoxDecoration(
+                                      //         color: Colors.blue,
+                                      //         borderRadius:
+                                      //             BorderRadius.circular(27),
+                                      //       ),
+                                      //       child: const Center(
+                                      //         child: Text(
+                                      //           "Edit",
+                                      //           style: TextStyle(
+                                      //               color: Colors.white),
+                                      //         ),
+                                      //       ),
+                                      //     ),
+                                      //   )
                                       : SlideAction(
                                           onSubmit: () {
                                             setState(() {
