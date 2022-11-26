@@ -8,7 +8,9 @@ import 'package:get_it/common/actionmessage.dart';
 import 'package:get_it/common/commonTextField.dart';
 import 'package:get_it/models/localStorage.dart';
 import 'package:get_it/models/userModel.dart';
+import 'package:get_it/services/fireStoreAuthServices.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class SetProfilePage extends StatefulWidget {
   final String email;
@@ -63,32 +65,6 @@ class _SetProfilePageState extends State<SetProfilePage> {
       });
     }
   }
-
-  // void cropId(XFile file) async {
-  //   CroppedFile? croppedImage = await ImageCropper().cropImage(
-  //       sourcePath: file.path,
-  //       aspectRatio: const CropAspectRatio(ratioX: 1, ratioY: 1),
-  //       compressQuality: 10);
-
-  //   if (croppedImage != null) {
-  //     setState(() {
-  //       idcardimg = File(croppedImage.path);
-  //     });
-  //   }
-  // }
-
-  // void cropprofilepic(XFile file) async {
-  //   CroppedFile? croppedImage = await ImageCropper().cropImage(
-  //       sourcePath: file.path,
-  //       aspectRatio: const CropAspectRatio(ratioX: 1, ratioY: 1),
-  //       compressQuality: 10);
-
-  //   if (croppedImage != null) {
-  //     setState(() {
-  //       profilepicimg = File(croppedImage.path);
-  //     });
-  //   }
-  // }
 
   void showprofileoption() {
     showDialog(
@@ -154,90 +130,6 @@ class _SetProfilePageState extends State<SetProfilePage> {
     );
   }
 
-  void checkImg() {
-    if (idcardimg == null) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Actionmessage(
-          message: 'Please upload idCard!',
-        ),
-        duration: Duration(seconds: 2),
-        behavior: SnackBarBehavior.floating,
-        elevation: 0,
-        backgroundColor: Colors.transparent,
-      ));
-    } else if (profilepicimg == null) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Actionmessage(
-          message: 'Please upload Profile picture!',
-        ),
-        duration: Duration(seconds: 2),
-        behavior: SnackBarBehavior.floating,
-        elevation: 0,
-        backgroundColor: Colors.transparent,
-      ));
-    } else if (nameController.text.isEmpty ||
-        collegevalue.isEmpty ||
-        branchController.text.isEmpty ||
-        batchvalue.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Actionmessage(
-          message: 'Please fill all the details',
-        ),
-        duration: Duration(seconds: 2),
-        behavior: SnackBarBehavior.floating,
-        elevation: 0,
-        backgroundColor: Colors.transparent,
-      ));
-    } else {
-      createProfile();
-    }
-  }
-
-  void createProfile() async {
-    String uid = FirebaseAuth.instance.currentUser!.uid;
-    UploadTask uploadidcard = FirebaseStorage.instance
-        .ref("profilepictures")
-        .child("${uid}idcard")
-        .putFile(idcardimg ?? File("assets/Images/auth.jpg"));
-    UploadTask uploadprofilepic = FirebaseStorage.instance
-        .ref("profilepictures")
-        .child("${uid}profilepic")
-        .putFile(profilepicimg ?? File("assets/Images/auth.jpg"));
-    TaskSnapshot snapshotprofilepic = await uploadprofilepic;
-    TaskSnapshot snapshotidcard = await uploadidcard;
-    String? profilepicURL = await snapshotprofilepic.ref.getDownloadURL();
-    String? idcardURL = await snapshotidcard.ref.getDownloadURL();
-    UserModel newUser = UserModel(
-      uid: uid,
-      email: widget.email,
-      college: collegevalue,
-      fullname: nameController.text,
-      batch: batchvalue,
-      branch: branchController.text,
-      idCard: idcardURL,
-      profilepic: profilepicURL,
-    );
-    FirebaseFirestore.instance
-        .collection("College")
-        .doc(collegevalue)
-        .collection("users")
-        .doc(uid)
-        .set(newUser.toMap())
-        .then((value) {
-      LocalStorage.saveCollege(collegevalue);
-
-      FirebaseFirestore.instance
-          .collection("College")
-          .doc(collegevalue)
-          .update({"userCount": FieldValue.increment(1)});
-      Navigator.popUntil(context, (route) => route.isFirst);
-
-      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) {
-        return bottomNav(firebaseUser: widget.firebaseUser, userModel: newUser);
-      }));
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
@@ -276,8 +168,21 @@ class _SetProfilePageState extends State<SetProfilePage> {
               Row(
                 children: [
                   InkWell(
-                    onTap: () {
-                      showprofileoption();
+                    onTap: () async {
+                      PermissionStatus storageStatus =
+                          await Permission.storage.request();
+                      if (storageStatus == PermissionStatus.granted) {
+                        showprofileoption();
+                      } else if (storageStatus == PermissionStatus.denied) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text("This permission is recommended"),
+                          ),
+                        );
+                      } else if (storageStatus ==
+                          PermissionStatus.permanentlyDenied) {
+                        openAppSettings();
+                      }
                     },
                     child: CircleAvatar(
                       radius: 30,
@@ -377,8 +282,21 @@ class _SetProfilePageState extends State<SetProfilePage> {
                 ),
               ),
               InkWell(
-                onTap: () {
-                  showidcardoption();
+                onTap: () async {
+                  PermissionStatus storageStatus =
+                      await Permission.storage.request();
+                  if (storageStatus == PermissionStatus.granted) {
+                    showidcardoption();
+                  } else if (storageStatus == PermissionStatus.denied) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text("This permission is recommended"),
+                      ),
+                    );
+                  } else if (storageStatus ==
+                      PermissionStatus.permanentlyDenied) {
+                    openAppSettings();
+                  }
                 },
                 child: Padding(
                   padding: const EdgeInsets.only(top: 16, bottom: 16),
@@ -396,8 +314,10 @@ class _SetProfilePageState extends State<SetProfilePage> {
                       child: Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: Icon(
-                          Icons.camera,
-                          color: Colors.black.withOpacity(0.6),
+                          idcardimg == null ? Icons.camera : Icons.done,
+                          color: idcardimg == null
+                              ? Colors.black.withOpacity(0.6)
+                              : Colors.green,
                         ),
                       ),
                     ),
@@ -406,7 +326,16 @@ class _SetProfilePageState extends State<SetProfilePage> {
               ),
               ElevatedButton(
                 onPressed: () {
-                  checkImg();
+                  FirestoreAuthServices.checkValues(
+                      collegevalue,
+                      widget.email,
+                      nameController.text.trim(),
+                      batchvalue,
+                      branchController.text.trim(),
+                      context,
+                      widget.firebaseUser,
+                      idcardimg,
+                      profilepicimg);
                 },
                 child: SizedBox(
                   height: 45,

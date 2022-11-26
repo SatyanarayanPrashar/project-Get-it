@@ -6,6 +6,7 @@ import 'package:get_it/Screens/bttomNav.dart';
 import 'package:get_it/models/firebaseHelper.dart';
 import 'package:get_it/models/localStorage.dart';
 import 'package:get_it/models/userModel.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:uuid/uuid.dart';
 
 var uuid = Uuid();
