@@ -1,6 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/Screens/bttomNav.dart';
 import 'package:get_it/Screens/chat/chatroom.dart';
@@ -11,9 +10,12 @@ import 'package:get_it/models/requestModel.dart';
 import 'package:get_it/models/userModel.dart';
 import 'package:get_it/services/fireStoreChatServices.dart';
 
-class RequestServices {
-  static Future<QuerySnapshot> fetchRequests(
+class RequestServices extends ChangeNotifier {
+  bool isLoading = false;
+
+  Future<QuerySnapshot> fetchRequests(
       bool isOnHomepage, UserModel userModel) async {
+    isLoading = true;
     final QuerySnapshot data = isOnHomepage
         ? await FirebaseFirestore.instance
             .collection("College")
@@ -28,7 +30,7 @@ class RequestServices {
             .collection("requests")
             .where("requestedby", isEqualTo: userModel.fullname)
             .get();
-
+    isLoading = false;
     return data;
   }
 
@@ -261,5 +263,19 @@ class RequestServices {
         backgroundColor: Colors.transparent,
       ));
     }
+  }
+
+  Future<QuerySnapshot> fetchComments(
+      UserModel userModel, RequestModel requestModel) async {
+    final QuerySnapshot data = await FirebaseFirestore.instance
+        .collection("College")
+        .doc(userModel.college)
+        .collection("requests")
+        .doc(requestModel.requestid)
+        .collection("comments")
+        .orderBy("commentedOn", descending: true)
+        .get();
+
+    return data;
   }
 }

@@ -5,7 +5,17 @@ import 'package:get_it/Screens/bttomNav.dart';
 import 'package:get_it/models/helperModel.dart';
 import 'package:get_it/models/userModel.dart';
 
-class HelperService {
+class HelperService extends ChangeNotifier {
+  Future<QuerySnapshot> fetchHelpers(UserModel userModel) async {
+    final QuerySnapshot data = await FirebaseFirestore.instance
+        .collection("College")
+        .doc(userModel.college)
+        .collection("helpers")
+        .orderBy("requestedOn", descending: true)
+        .get();
+    return data;
+  }
+
   static Future<void> createHelper(
       BuildContext context,
       User firebaseUser,

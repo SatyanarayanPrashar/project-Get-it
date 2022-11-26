@@ -15,6 +15,8 @@ import 'package:get_it/models/localStorage.dart';
 import 'package:get_it/models/messageModel.dart';
 import 'package:get_it/models/requestModel.dart';
 import 'package:get_it/models/userModel.dart';
+import 'package:get_it/services/firebaseRequestServices.dart';
+import 'package:provider/provider.dart';
 import 'package:slide_to_act/slide_to_act.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
@@ -36,28 +38,6 @@ class RequestDetailPage extends StatefulWidget {
 }
 
 class _RequestDetailPageState extends State<RequestDetailPage> {
-  late Future<QuerySnapshot> commentList;
-
-  @override
-  void initState() {
-    super.initState();
-    commentList = fetchComments();
-  }
-
-  Future<QuerySnapshot> fetchComments() async {
-    String? college = await LocalStorage.getCollege();
-    final QuerySnapshot data = await FirebaseFirestore.instance
-        .collection("College")
-        .doc(college)
-        .collection("requests")
-        .doc(widget.requestModel.requestid)
-        .collection("comments")
-        .orderBy("commentedOn", descending: true)
-        .get();
-
-    return data;
-  }
-
   void createChat() async {
     String? currentCollege = await LocalStorage.getCollege();
     String? chatid = uuid.v1();
@@ -85,156 +65,170 @@ class _RequestDetailPageState extends State<RequestDetailPage> {
           style: TextStyle(color: Colors.black.withOpacity(0.6)),
         ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.only(left: 16, right: 16, top: 11),
-        child: FutureBuilder<QuerySnapshot>(
-            future: commentList,
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.done) {
-                if (snapshot.hasData) {
-                  QuerySnapshot commentSnapshot =
-                      snapshot.data as QuerySnapshot;
-                  int doclength = commentSnapshot.docs.length;
-                  return RefreshIndicator(
-                    onRefresh: () async {
-                      setState(() {
-                        commentList = fetchComments();
-                      });
-                    },
-                    child: doclength != 0
-                        ? ListView.builder(
-                            itemCount: doclength,
-                            itemBuilder: (context, index) {
-                              CommentModel currentHelp = CommentModel.fromMap(
-                                  commentSnapshot.docs[index].data()
-                                      as Map<String, dynamic>);
+      body: Consumer<RequestServices>(
+        builder: (context, requestNoti, child) {
+          return Padding(
+            padding: const EdgeInsets.only(left: 16, right: 16, top: 11),
+            child: FutureBuilder<QuerySnapshot>(
+                future: requestNoti.fetchComments(
+                    widget.loggedUserModel, widget.requestModel),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.done) {
+                    if (snapshot.hasData) {
+                      QuerySnapshot commentSnapshot =
+                          snapshot.data as QuerySnapshot;
+                      int doclength = commentSnapshot.docs.length;
+                      return RefreshIndicator(
+                        onRefresh: () async {
+                          setState(() {});
+                        },
+                        child: doclength != 0
+                            ? ListView.builder(
+                                itemCount: doclength,
+                                itemBuilder: (context, index) {
+                                  CommentModel currentHelp =
+                                      CommentModel.fromMap(
+                                          commentSnapshot.docs[index].data()
+                                              as Map<String, dynamic>);
 
-                              return index == 0
-                                  ? Column(
-                                      children: [
-                                        RequestTile(
-                                          tileLocation: "detailpg",
-                                          requestid:
-                                              widget.requestModel.requestid,
-                                          profilePic: widget
-                                              .requestModel.requesterProfilePic,
-                                          isUserPost: widget.isUserPost,
-                                          requestedby:
-                                              widget.requestModel.requestedBy,
-                                          note: widget.requestModel.note,
-                                          one: widget.requestModel.one,
-                                          oneQuantity:
-                                              widget.requestModel.oneQuantity,
-                                          two: widget.requestModel.two,
-                                          twoQuantity:
-                                              widget.requestModel.twoQuantity,
-                                          three: widget.requestModel.three,
-                                          threeQuantity:
-                                              widget.requestModel.threeQuantity,
-                                          getitBy: widget.requestModel.getby,
-                                          price: widget.requestModel.price,
-                                          requestedon:
-                                              widget.requestModel.requestedOn ??
+                                  return index == 0
+                                      ? Column(
+                                          children: [
+                                            RequestTile(
+                                              tileLocation: "detailpg",
+                                              requestid:
+                                                  widget.requestModel.requestid,
+                                              profilePic: widget.requestModel
+                                                  .requesterProfilePic,
+                                              isUserPost: widget.isUserPost,
+                                              requestedby: widget
+                                                  .requestModel.requestedBy,
+                                              note: widget.requestModel.note,
+                                              one: widget.requestModel.one,
+                                              oneQuantity: widget
+                                                  .requestModel.oneQuantity,
+                                              two: widget.requestModel.two,
+                                              twoQuantity: widget
+                                                  .requestModel.twoQuantity,
+                                              three: widget.requestModel.three,
+                                              threeQuantity: widget
+                                                  .requestModel.threeQuantity,
+                                              getitBy:
+                                                  widget.requestModel.getby,
+                                              price: widget.requestModel.price,
+                                              requestedon: widget.requestModel
+                                                      .requestedOn ??
                                                   DateTime.now(),
-                                          loggedUserModel:
-                                              widget.loggedUserModel,
-                                          firebaseUser: widget.firebaseUser,
-                                        ),
-                                        commentTile(
-                                          helperProfilePic:
-                                              currentHelp.helperProfilePic,
-                                          helperName: currentHelp.commentBy,
-                                          loggedUserModel:
-                                              widget.loggedUserModel,
-                                          firebaseUsser: widget.firebaseUser,
-                                          time: currentHelp.timing,
-                                          commentedOn: currentHelp.commentedOn,
-                                          note: currentHelp.note,
-                                          helperId: currentHelp.helperId,
-                                          requestModel: widget.requestModel,
-                                        ),
-                                        doclength == 1
-                                            ? const Text(
-                                                "there are no one else to help :(")
-                                            : Container(),
-                                        doclength == 1
-                                            ? const Text(
-                                                "Make sure to share with your friends :)")
-                                            : Container(),
-                                      ],
-                                    )
-                                  : Column(
-                                      children: [
-                                        commentTile(
-                                          loggedUserModel:
-                                              widget.loggedUserModel,
-                                          helperProfilePic:
-                                              currentHelp.helperProfilePic,
-                                          firebaseUsser: widget.firebaseUser,
-                                          helperName: currentHelp.commentBy,
-                                          time: currentHelp.timing,
-                                          commentedOn: currentHelp.commentedOn,
-                                          note: currentHelp.note,
-                                          helperId: currentHelp.helperId,
-                                          requestModel: widget.requestModel,
-                                        ),
-                                        index == doclength - 1
-                                            ? const Text(
-                                                "there are no one else to help :(")
-                                            : Container(),
-                                        index == doclength - 1
-                                            ? const Text(
-                                                "Make sure to share with your friends :)")
-                                            : Container(),
-                                      ],
-                                    );
-                            },
-                          )
-                        : Column(
-                            children: [
-                              RequestTile(
-                                tileLocation: "detailpg",
-                                requestid: widget.requestModel.requestid,
-                                profilePic:
-                                    widget.requestModel.requesterProfilePic,
-                                isUserPost: widget.isUserPost,
-                                requestedby: widget.requestModel.requestedBy,
-                                note: widget.requestModel.note,
-                                one: widget.requestModel.one,
-                                oneQuantity: widget.requestModel.oneQuantity,
-                                two: widget.requestModel.two,
-                                twoQuantity: widget.requestModel.twoQuantity,
-                                three: widget.requestModel.three,
-                                threeQuantity:
-                                    widget.requestModel.threeQuantity,
-                                getitBy: widget.requestModel.getby,
-                                price: widget.requestModel.price,
-                                requestedon: widget.requestModel.requestedOn ??
-                                    DateTime.now(),
-                                loggedUserModel: widget.loggedUserModel,
-                                firebaseUser: widget.firebaseUser,
+                                              loggedUserModel:
+                                                  widget.loggedUserModel,
+                                              firebaseUser: widget.firebaseUser,
+                                            ),
+                                            commentTile(
+                                              helperProfilePic:
+                                                  currentHelp.helperProfilePic,
+                                              helperName: currentHelp.commentBy,
+                                              loggedUserModel:
+                                                  widget.loggedUserModel,
+                                              firebaseUsser:
+                                                  widget.firebaseUser,
+                                              time: currentHelp.timing,
+                                              commentedOn:
+                                                  currentHelp.commentedOn,
+                                              note: currentHelp.note,
+                                              helperId: currentHelp.helperId,
+                                              requestModel: widget.requestModel,
+                                            ),
+                                            doclength == 1
+                                                ? const Text(
+                                                    "there are no one else to help :(")
+                                                : Container(),
+                                            doclength == 1
+                                                ? const Text(
+                                                    "Make sure to share with your friends :)")
+                                                : Container(),
+                                          ],
+                                        )
+                                      : Column(
+                                          children: [
+                                            commentTile(
+                                              loggedUserModel:
+                                                  widget.loggedUserModel,
+                                              helperProfilePic:
+                                                  currentHelp.helperProfilePic,
+                                              firebaseUsser:
+                                                  widget.firebaseUser,
+                                              helperName: currentHelp.commentBy,
+                                              time: currentHelp.timing,
+                                              commentedOn:
+                                                  currentHelp.commentedOn,
+                                              note: currentHelp.note,
+                                              helperId: currentHelp.helperId,
+                                              requestModel: widget.requestModel,
+                                            ),
+                                            index == doclength - 1
+                                                ? const Text(
+                                                    "there are no one else to help :(")
+                                                : Container(),
+                                            index == doclength - 1
+                                                ? const Text(
+                                                    "Make sure to share with your friends :)")
+                                                : Container(),
+                                          ],
+                                        );
+                                },
+                              )
+                            : Column(
+                                children: [
+                                  RequestTile(
+                                    tileLocation: "detailpg",
+                                    requestid: widget.requestModel.requestid,
+                                    profilePic:
+                                        widget.requestModel.requesterProfilePic,
+                                    isUserPost: widget.isUserPost,
+                                    requestedby:
+                                        widget.requestModel.requestedBy,
+                                    note: widget.requestModel.note,
+                                    one: widget.requestModel.one,
+                                    oneQuantity:
+                                        widget.requestModel.oneQuantity,
+                                    two: widget.requestModel.two,
+                                    twoQuantity:
+                                        widget.requestModel.twoQuantity,
+                                    three: widget.requestModel.three,
+                                    threeQuantity:
+                                        widget.requestModel.threeQuantity,
+                                    getitBy: widget.requestModel.getby,
+                                    price: widget.requestModel.price,
+                                    requestedon:
+                                        widget.requestModel.requestedOn ??
+                                            DateTime.now(),
+                                    loggedUserModel: widget.loggedUserModel,
+                                    firebaseUser: widget.firebaseUser,
+                                  ),
+                                  Center(
+                                    child:
+                                        Text("No one offered any help yet :("),
+                                  ),
+                                ],
                               ),
-                              Center(
-                                child: Text("No one offered any help yet :("),
-                              ),
-                            ],
-                          ),
-                  );
-                } else if (snapshot.hasError) {
-                  return const Center(
-                    child: Text("somthing went wrong :("),
-                  );
-                } else {
-                  return const Center(
-                    child: Text("YOu have not requested anything yet:("),
-                  );
-                }
-              } else {
-                return const Center(
-                  child: CircularProgressIndicator(),
-                );
-              }
-            }),
+                      );
+                    } else if (snapshot.hasError) {
+                      return const Center(
+                        child: Text("somthing went wrong :("),
+                      );
+                    } else {
+                      return const Center(
+                        child: Text("YOu have not requested anything yet:("),
+                      );
+                    }
+                  } else {
+                    return const Center(
+                      child: CircularProgressIndicator(),
+                    );
+                  }
+                }),
+          );
+        },
       ),
     );
   }

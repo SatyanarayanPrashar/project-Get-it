@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:get_it/Screens/insiderScreens/HelperForm.dart';
 import 'package:get_it/Screens/insiderScreens/RequestFormPage.dart';
 import 'package:get_it/models/helperModel.dart';
+import 'package:get_it/services/firebaseHelperService.dart';
+import 'package:provider/provider.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import 'package:get_it/models/userModel.dart';
 import 'package:slide_to_act/slide_to_act.dart';
@@ -20,23 +22,6 @@ class HelpersScreen extends StatefulWidget {
 }
 
 class _HelpersScreenState extends State<HelpersScreen> {
-  late Future<QuerySnapshot> helperList;
-  @override
-  void initState() {
-    super.initState();
-    helperList = fetchHelpers();
-  }
-
-  Future<QuerySnapshot> fetchHelpers() async {
-    final QuerySnapshot data = await FirebaseFirestore.instance
-        .collection("College")
-        .doc(widget.userModel.college)
-        .collection("helpers")
-        .orderBy("requestedOn", descending: true)
-        .get();
-    return data;
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -52,85 +37,90 @@ class _HelpersScreenState extends State<HelpersScreen> {
         backgroundColor: Colors.blue,
         child: const Icon(Icons.add),
       ),
-      body: Padding(
-        padding: const EdgeInsets.only(left: 16, right: 16),
-        child: FutureBuilder<QuerySnapshot>(
-            future: helperList,
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.done) {
-                if (snapshot.hasData) {
-                  QuerySnapshot requestSnapshot =
-                      snapshot.data as QuerySnapshot;
-                  return RefreshIndicator(
-                    onRefresh: () async {
-                      setState(() {
-                        helperList = fetchHelpers();
-                      });
-                    },
-                    child: ListView.builder(
-                      itemCount: requestSnapshot.docs.length,
-                      itemBuilder: (context, index) {
-                        HelperModel currentHelper = HelperModel.fromMap(
-                            requestSnapshot.docs[index].data()
-                                as Map<String, dynamic>);
+      body: Consumer<HelperService>(
+        builder: (context, helperNotifier, child) => Padding(
+          padding: const EdgeInsets.only(left: 16, right: 16),
+          child: FutureBuilder<QuerySnapshot>(
+              future: helperNotifier.fetchHelpers(widget.userModel),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.done) {
+                  if (snapshot.hasData) {
+                    QuerySnapshot requestSnapshot =
+                        snapshot.data as QuerySnapshot;
+                    return RefreshIndicator(
+                      onRefresh: () async {
+                        setState(() {
+                          // helperNotifier.fetchHelpers(widget.userModel);
+                        });
+                      },
+                      child: ListView.builder(
+                        itemCount: requestSnapshot.docs.length,
+                        itemBuilder: (context, index) {
+                          HelperModel currentHelper = HelperModel.fromMap(
+                              requestSnapshot.docs[index].data()
+                                  as Map<String, dynamic>);
 
-                        return requestSnapshot.docs.length == 0
-                            ? Column(
-                                children: [
-                                  Row(),
-                                  Container(
-                                    height: 250,
-                                    width: 250,
-                                    decoration: const BoxDecoration(
-                                      image: DecorationImage(
-                                        image: AssetImage(
-                                            "assets/Images/auth.jpg"),
+                          return requestSnapshot.docs.length == 0
+                              ? Column(
+                                  children: [
+                                    Row(),
+                                    Container(
+                                      height: 250,
+                                      width: 250,
+                                      decoration: const BoxDecoration(
+                                        image: DecorationImage(
+                                          image: AssetImage(
+                                              "assets/Images/auth.jpg"),
+                                        ),
                                       ),
                                     ),
-                                  ),
-                                  Text("No Helpers Yet!")
-                                ],
-                              )
-                            : Column(
-                                children: [
-                                  HelperTile(
-                                    userModel: widget.userModel,
-                                    firebaseUser: widget.firebaseUser,
-                                    requestedon: currentHelper.requestedOn ??
-                                        DateTime.now(),
-                                    avilableon: currentHelper.helpOn ?? "NA :(",
-                                    helperName: currentHelper.helpBy ?? "NA:(",
-                                    helperUid: currentHelper.helperUid ?? "",
-                                    note: currentHelper.note,
-                                    profilepic: currentHelper.helperProfilePic,
-                                  ),
-                                  index == requestSnapshot.docs.length - 1
-                                      ? const Padding(
-                                          padding: EdgeInsets.only(bottom: 11),
-                                          child: Text(
-                                              "No more requests avialable"),
-                                        )
-                                      : Container(),
-                                ],
-                              );
-                      },
-                    ),
-                  );
-                } else if (snapshot.hasError) {
-                  return const Center(
-                    child: Text("somthing went wrong :("),
-                  );
+                                    Text("No Helpers Yet!")
+                                  ],
+                                )
+                              : Column(
+                                  children: [
+                                    HelperTile(
+                                      userModel: widget.userModel,
+                                      firebaseUser: widget.firebaseUser,
+                                      requestedon: currentHelper.requestedOn ??
+                                          DateTime.now(),
+                                      avilableon:
+                                          currentHelper.helpOn ?? "NA :(",
+                                      helperName: currentHelper.helpBy,
+                                      helperUid: currentHelper.helperUid ?? "",
+                                      note: currentHelper.note,
+                                      profilepic:
+                                          currentHelper.helperProfilePic,
+                                    ),
+                                    index == requestSnapshot.docs.length - 1
+                                        ? const Padding(
+                                            padding:
+                                                EdgeInsets.only(bottom: 11),
+                                            child: Text(
+                                                "No more requests avialable"),
+                                          )
+                                        : Container(),
+                                  ],
+                                );
+                        },
+                      ),
+                    );
+                  } else if (snapshot.hasError) {
+                    return const Center(
+                      child: Text("somthing went wrong :("),
+                    );
+                  } else {
+                    return const Center(
+                      child: Text("You have not requested anything yet:("),
+                    );
+                  }
                 } else {
                   return const Center(
-                    child: Text("You have not requested anything yet:("),
+                    child: CircularProgressIndicator(),
                   );
                 }
-              } else {
-                return const Center(
-                  child: CircularProgressIndicator(),
-                );
-              }
-            }),
+              }),
+        ),
       ),
     );
   }
