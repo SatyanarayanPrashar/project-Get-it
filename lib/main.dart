@@ -6,7 +6,9 @@ import 'package:get_it/Screens/bttomNav.dart';
 import 'package:get_it/models/firebaseHelper.dart';
 import 'package:get_it/models/localStorage.dart';
 import 'package:get_it/models/userModel.dart';
-import 'package:permission_handler/permission_handler.dart';
+import 'package:get_it/services/firebaseHelperService.dart';
+import 'package:get_it/services/firebaseRequestServices.dart';
+import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
 
 var uuid = Uuid();
@@ -23,11 +25,27 @@ void main() async {
           currentUser.uid, currentCollege);
       if (thisUserModel != null) {
         runApp(
-            MyAppLogged(userModel: thisUserModel, firebaseUser: currentUser));
+          MultiProvider(
+            providers: [
+              ChangeNotifierProvider(create: (_) => RequestServices()),
+              ChangeNotifierProvider(create: (_) => HelperService()),
+            ],
+            child: MyAppLogged(
+                userModel: thisUserModel, firebaseUser: currentUser),
+          ),
+        );
       }
     }
   } else {
-    runApp(const MyApp());
+    runApp(
+      MultiProvider(
+        providers: [
+          ChangeNotifierProvider(create: (_) => RequestServices()),
+          ChangeNotifierProvider(create: (_) => HelperService()),
+        ],
+        child: const MyApp(),
+      ),
+    );
   }
 }
 
