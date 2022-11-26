@@ -9,6 +9,7 @@ import 'package:get_it/common/commonTextField.dart';
 import 'package:get_it/models/localStorage.dart';
 import 'package:get_it/models/userModel.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class SetProfilePage extends StatefulWidget {
   final String email;
@@ -276,8 +277,21 @@ class _SetProfilePageState extends State<SetProfilePage> {
               Row(
                 children: [
                   InkWell(
-                    onTap: () {
-                      showprofileoption();
+                    onTap: () async {
+                      PermissionStatus storageStatus =
+                          await Permission.storage.request();
+                      if (storageStatus == PermissionStatus.granted) {
+                        showprofileoption();
+                      } else if (storageStatus == PermissionStatus.denied) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text("This permission is recommended"),
+                          ),
+                        );
+                      } else if (storageStatus ==
+                          PermissionStatus.permanentlyDenied) {
+                        openAppSettings();
+                      }
                     },
                     child: CircleAvatar(
                       radius: 30,
@@ -377,8 +391,21 @@ class _SetProfilePageState extends State<SetProfilePage> {
                 ),
               ),
               InkWell(
-                onTap: () {
-                  showidcardoption();
+                onTap: () async {
+                  PermissionStatus storageStatus =
+                      await Permission.storage.request();
+                  if (storageStatus == PermissionStatus.granted) {
+                    showidcardoption();
+                  } else if (storageStatus == PermissionStatus.denied) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text("This permission is recommended"),
+                      ),
+                    );
+                  } else if (storageStatus ==
+                      PermissionStatus.permanentlyDenied) {
+                    openAppSettings();
+                  }
                 },
                 child: Padding(
                   padding: const EdgeInsets.only(top: 16, bottom: 16),
@@ -396,8 +423,10 @@ class _SetProfilePageState extends State<SetProfilePage> {
                       child: Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: Icon(
-                          Icons.camera,
-                          color: Colors.black.withOpacity(0.6),
+                          idcardimg == null ? Icons.camera : Icons.done,
+                          color: idcardimg == null
+                              ? Colors.black.withOpacity(0.6)
+                              : Colors.green,
                         ),
                       ),
                     ),
