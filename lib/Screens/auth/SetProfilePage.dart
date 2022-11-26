@@ -65,32 +65,6 @@ class _SetProfilePageState extends State<SetProfilePage> {
     }
   }
 
-  // void cropId(XFile file) async {
-  //   CroppedFile? croppedImage = await ImageCropper().cropImage(
-  //       sourcePath: file.path,
-  //       aspectRatio: const CropAspectRatio(ratioX: 1, ratioY: 1),
-  //       compressQuality: 10);
-
-  //   if (croppedImage != null) {
-  //     setState(() {
-  //       idcardimg = File(croppedImage.path);
-  //     });
-  //   }
-  // }
-
-  // void cropprofilepic(XFile file) async {
-  //   CroppedFile? croppedImage = await ImageCropper().cropImage(
-  //       sourcePath: file.path,
-  //       aspectRatio: const CropAspectRatio(ratioX: 1, ratioY: 1),
-  //       compressQuality: 10);
-
-  //   if (croppedImage != null) {
-  //     setState(() {
-  //       profilepicimg = File(croppedImage.path);
-  //     });
-  //   }
-  // }
-
   void showprofileoption() {
     showDialog(
       context: context,
