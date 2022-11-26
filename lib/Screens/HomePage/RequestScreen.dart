@@ -5,6 +5,7 @@ import 'package:get_it/Screens/HomePage/requestTile.dart';
 import 'package:get_it/Screens/insiderScreens/RequestFormPage.dart';
 import 'package:get_it/models/requestModel.dart';
 import 'package:get_it/models/userModel.dart';
+import 'package:get_it/services/firebaseRequestServices.dart';
 
 class RequestScreen extends StatefulWidget {
   RequestScreen(
@@ -26,26 +27,8 @@ class _RequestScreenState extends State<RequestScreen> {
   @override
   void initState() {
     super.initState();
-    requestList = fetchRequests();
-  }
-
-  Future<QuerySnapshot> fetchRequests() async {
-    final QuerySnapshot data = widget.isOnHomepage
-        ? await FirebaseFirestore.instance
-            .collection("College")
-            .doc(widget.userModel.college)
-            .collection("requests")
-            .orderBy("requestedOn", descending: true)
-            .where("personalised", isEqualTo: false)
-            .get()
-        : await FirebaseFirestore.instance
-            .collection("College")
-            .doc(widget.userModel.college)
-            .collection("requests")
-            .where("requestedby", isEqualTo: widget.userModel.fullname)
-            .get();
-
-    return data;
+    requestList =
+        RequestServices.fetchRequests(widget.isOnHomepage, widget.userModel);
   }
 
   @override
@@ -75,7 +58,8 @@ class _RequestScreenState extends State<RequestScreen> {
                 return RefreshIndicator(
                   onRefresh: () async {
                     setState(() {
-                      requestList = fetchRequests();
+                      requestList = RequestServices.fetchRequests(
+                          widget.isOnHomepage, widget.userModel);
                     });
                   },
                   child: requestSnapshot.docs.length == 0
@@ -124,7 +108,10 @@ class _RequestScreenState extends State<RequestScreen> {
                                     print("refresh pressed");
                                     setState(() {
                                       print("refresh in process");
-                                      requestList = fetchRequests();
+                                      requestList =
+                                          RequestServices.fetchRequests(
+                                              widget.isOnHomepage,
+                                              widget.userModel);
                                       print("refreshed");
                                     });
                                   },

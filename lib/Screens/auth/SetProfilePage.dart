@@ -8,6 +8,7 @@ import 'package:get_it/common/actionmessage.dart';
 import 'package:get_it/common/commonTextField.dart';
 import 'package:get_it/models/localStorage.dart';
 import 'package:get_it/models/userModel.dart';
+import 'package:get_it/services/fireStoreAuthServices.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
 
@@ -127,90 +128,6 @@ class _SetProfilePageState extends State<SetProfilePage> {
         );
       },
     );
-  }
-
-  void checkImg() {
-    if (idcardimg == null) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Actionmessage(
-          message: 'Please upload idCard!',
-        ),
-        duration: Duration(seconds: 2),
-        behavior: SnackBarBehavior.floating,
-        elevation: 0,
-        backgroundColor: Colors.transparent,
-      ));
-    } else if (profilepicimg == null) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Actionmessage(
-          message: 'Please upload Profile picture!',
-        ),
-        duration: Duration(seconds: 2),
-        behavior: SnackBarBehavior.floating,
-        elevation: 0,
-        backgroundColor: Colors.transparent,
-      ));
-    } else if (nameController.text.isEmpty ||
-        collegevalue.isEmpty ||
-        branchController.text.isEmpty ||
-        batchvalue.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Actionmessage(
-          message: 'Please fill all the details',
-        ),
-        duration: Duration(seconds: 2),
-        behavior: SnackBarBehavior.floating,
-        elevation: 0,
-        backgroundColor: Colors.transparent,
-      ));
-    } else {
-      createProfile();
-    }
-  }
-
-  void createProfile() async {
-    String uid = FirebaseAuth.instance.currentUser!.uid;
-    UploadTask uploadidcard = FirebaseStorage.instance
-        .ref("profilepictures")
-        .child("${uid}idcard")
-        .putFile(idcardimg ?? File("assets/Images/auth.jpg"));
-    UploadTask uploadprofilepic = FirebaseStorage.instance
-        .ref("profilepictures")
-        .child("${uid}profilepic")
-        .putFile(profilepicimg ?? File("assets/Images/auth.jpg"));
-    TaskSnapshot snapshotprofilepic = await uploadprofilepic;
-    TaskSnapshot snapshotidcard = await uploadidcard;
-    String? profilepicURL = await snapshotprofilepic.ref.getDownloadURL();
-    String? idcardURL = await snapshotidcard.ref.getDownloadURL();
-    UserModel newUser = UserModel(
-      uid: uid,
-      email: widget.email,
-      college: collegevalue,
-      fullname: nameController.text,
-      batch: batchvalue,
-      branch: branchController.text,
-      idCard: idcardURL,
-      profilepic: profilepicURL,
-    );
-    FirebaseFirestore.instance
-        .collection("College")
-        .doc(collegevalue)
-        .collection("users")
-        .doc(uid)
-        .set(newUser.toMap())
-        .then((value) {
-      LocalStorage.saveCollege(collegevalue);
-
-      FirebaseFirestore.instance
-          .collection("College")
-          .doc(collegevalue)
-          .update({"userCount": FieldValue.increment(1)});
-      Navigator.popUntil(context, (route) => route.isFirst);
-
-      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) {
-        return bottomNav(firebaseUser: widget.firebaseUser, userModel: newUser);
-      }));
-    });
   }
 
   @override
@@ -409,7 +326,16 @@ class _SetProfilePageState extends State<SetProfilePage> {
               ),
               ElevatedButton(
                 onPressed: () {
-                  checkImg();
+                  FirestoreAuthServices.checkValues(
+                      collegevalue,
+                      widget.email,
+                      nameController.text.trim(),
+                      batchvalue,
+                      branchController.text.trim(),
+                      context,
+                      widget.firebaseUser,
+                      idcardimg,
+                      profilepicimg);
                 },
                 child: SizedBox(
                   height: 45,

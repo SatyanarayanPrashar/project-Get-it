@@ -4,11 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:get_it/Screens/HomePage/requestTile.dart';
 import 'package:get_it/common/bottomSheet.dart';
 import 'package:get_it/common/custom_confirmation_dialog.dart';
-import 'package:get_it/main.dart';
 import 'package:get_it/models/chatRoomModel.dart';
 import 'package:get_it/models/messageModel.dart';
 import 'package:get_it/models/requestModel.dart';
 import 'package:get_it/models/userModel.dart';
+import 'package:get_it/services/fireStoreChatServices.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
 class ChatScreen extends StatefulWidget {
@@ -34,47 +34,6 @@ class ChatScreen extends StatefulWidget {
 
 class _ChatScreenState extends State<ChatScreen> {
   TextEditingController messageController = TextEditingController();
-
-  void sendmssg() async {
-    String mssg = messageController.text.trim();
-    if (mssg != "") {
-      //send mssg
-      MessageModel newMssg = MessageModel(
-        mssgId: uuid.v1(),
-        sender: widget.userModel.uid,
-        createdon: DateTime.now(),
-        text: mssg,
-        seen: false,
-      );
-      FirebaseFirestore.instance
-          .collection("College")
-          .doc(widget.userModel.college)
-          .collection("chatrooms")
-          .doc(widget.chatRoomModel.chatroomid)
-          .collection("messages")
-          .doc(newMssg.mssgId)
-          .set(newMssg.toMap());
-      messageController.clear();
-
-      FirebaseFirestore.instance
-          .collection("College")
-          .doc(widget.userModel.college)
-          .collection("chatrooms")
-          .doc(widget.chatRoomModel.chatroomid)
-          .update({"lastMessage": mssg, "createdon": DateTime.now()});
-    }
-  }
-
-  void closeChat() async {
-    print(widget.chatRoomModel.chatClosed);
-    FirebaseFirestore.instance
-        .collection("College")
-        .doc(widget.userModel.college)
-        .collection("chatrooms")
-        .doc(widget.chatRoomModel.chatroomid)
-        .update({"chatClosed": true}).then(
-            (value) => print(widget.chatRoomModel.chatClosed));
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -561,10 +520,12 @@ class _ChatScreenState extends State<ChatScreen> {
                                       message:
                                           "Are you sure, close the chat?\nYou can reopen it by accepting the help from the request",
                                       onPress: () {
-                                        closeChat();
+                                        FirestoreChatServices.closeChat(
+                                            widget.userModel,
+                                            widget.chatRoomModel);
                                         Navigator.pop(context);
-                                        setState(() {});
                                       });
+                                  Navigator.pop(context);
                                 },
                                 child: Container(
                                   padding:
@@ -629,7 +590,12 @@ class _ChatScreenState extends State<ChatScreen> {
                                     borderRadius: BorderRadius.circular(11)),
                                 child: IconButton(
                                     onPressed: () {
-                                      sendmssg();
+                                      // sendmssg();
+                                      FirestoreChatServices.sendMssg(
+                                          messageController.text.trim(),
+                                          widget.userModel,
+                                          widget.chatRoomModel,
+                                          messageController);
                                     },
                                     icon: const Icon(
                                       Icons.send,

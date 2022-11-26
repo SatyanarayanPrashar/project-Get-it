@@ -1,14 +1,7 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/Screens/auth/SignupPage.dart';
-import 'package:get_it/Screens/auth/widgets/animatedButton.dart';
-import 'package:get_it/Screens/bttomNav.dart';
-import 'package:get_it/common/actionmessage.dart';
 import 'package:get_it/common/commonTextField.dart';
-import 'package:get_it/models/localStorage.dart';
-import 'package:get_it/models/userModel.dart';
-import 'package:permission_handler/permission_handler.dart';
+import 'package:get_it/services/fireStoreAuthServices.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -26,55 +19,6 @@ class _LoginPageState extends State<LoginPage> {
     'NMIT, Bengaluru',
     'SMVIT, Bengaluru',
   ];
-
-  void login() async {
-    String email = emailController.text.trim();
-    String password = passwordController.text.trim();
-
-    if (email == "" || password == "" || collegevalue == "") {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Actionmessage(
-          message: 'Please fill all the details!',
-        ),
-        duration: Duration(seconds: 2),
-        behavior: SnackBarBehavior.floating,
-        elevation: 0,
-        backgroundColor: Colors.transparent,
-      ));
-    } else {
-      LocalStorage.saveCollege(collegevalue);
-      try {
-        UserCredential credential = await FirebaseAuth.instance
-            .signInWithEmailAndPassword(email: email, password: password);
-
-        String uid = credential.user!.uid;
-
-        DocumentSnapshot userData = await FirebaseFirestore.instance
-            .collection("College")
-            .doc(collegevalue)
-            .collection("users")
-            .doc(uid)
-            .get();
-        UserModel userModel =
-            UserModel.fromMap(userData.data() as Map<String, dynamic>);
-
-        Navigator.push(context, MaterialPageRoute(builder: (context) {
-          return bottomNav(
-              userModel: userModel, firebaseUser: credential.user!);
-        }));
-      } on FirebaseAuthException catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Actionmessage(
-            message: e.code.toString(),
-          ),
-          duration: Duration(seconds: 2),
-          behavior: SnackBarBehavior.floating,
-          elevation: 0,
-          backgroundColor: Colors.transparent,
-        ));
-      }
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -157,7 +101,8 @@ class _LoginPageState extends State<LoginPage> {
               ),
               ElevatedButton(
                 onPressed: () {
-                  login();
+                  FirestoreAuthServices.login(emailController,
+                      passwordController, collegevalue, context);
                 },
                 child: SizedBox(
                   height: 45,
@@ -173,25 +118,11 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                 ),
               ),
-              // Padding(
-              //   padding: const EdgeInsets.only(top: 16),
-              //   child: InkWell(
-              //     onTap: () {
-              //       // Authentication here
-              //       print("tapped");
-              //     },
-              //     child: const Button(
-              //         buttonText:
-              //             "For seamless one-tap logins, please use your Google account to continue."),
-              //   ),
-              // ),
               Padding(
                 padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
                 child: TextButton(
                   onPressed: () {
-                    // Navigator.push(context, MaterialPageRoute(builder: (context) {
-                    //   return ();
-                    // }));
+                    //
                   },
                   child: const Text(
                     "Forgot password?",
