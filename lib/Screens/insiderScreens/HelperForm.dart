@@ -1,11 +1,9 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:get_it/Screens/bttomNav.dart';
 import 'package:get_it/common/commonTextField.dart';
 import 'package:get_it/main.dart';
-import 'package:get_it/models/helperModel.dart';
 import 'package:get_it/models/userModel.dart';
+import 'package:get_it/services/firebaseHelperService.dart';
 
 class HelperFormPage extends StatefulWidget {
   const HelperFormPage(
@@ -24,35 +22,7 @@ class _HelperFormPageState extends State<HelperFormPage> {
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
-
-    void createHelper() async {
-      String helpUid = uuid.v1();
-
-      if (availablecontroller.text.isNotEmpty) {
-        HelperModel newhelper = HelperModel(
-          helpBy: widget.userModel.fullname,
-          helperUid: widget.userModel.uid,
-          helpUid: helpUid,
-          helpOn: availablecontroller.text,
-          helperProfilePic: widget.userModel.profilepic,
-          note: notecontroller.text,
-          requestedOn: DateTime.now(),
-        );
-        FirebaseFirestore.instance
-            .collection("College")
-            .doc(widget.userModel.college)
-            .collection("helpers")
-            .doc(helpUid)
-            .set(newhelper.toMap());
-        Navigator.pushReplacement(context,
-            MaterialPageRoute(builder: (context) {
-          return bottomNav(
-            userModel: widget.userModel,
-            firebaseUser: widget.firebaseUser,
-          );
-        }));
-      }
-    }
+    String helpUid = uuid.v1();
 
     return Scaffold(
       appBar: AppBar(
@@ -85,7 +55,14 @@ class _HelperFormPageState extends State<HelperFormPage> {
               InkWell(
                 onTap: () {
                   //
-                  createHelper();
+                  HelperService.createHelper(
+                    context,
+                    widget.firebaseUser,
+                    widget.userModel,
+                    helpUid,
+                    notecontroller,
+                    availablecontroller,
+                  );
                 },
                 child: Container(
                   width: size.width,
