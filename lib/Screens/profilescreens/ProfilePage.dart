@@ -1,8 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:get_it/Screens/HomePage/HelpersScreen.dart';
 import 'package:get_it/Screens/HomePage/RequestScreen.dart';
-import 'package:get_it/Screens/profilescreens/profileHeader.dart';
+import 'package:get_it/Screens/HomePage/header.dart';
+import 'package:get_it/Screens/profilescreens/aboutTab.dart';
 import 'package:get_it/models/userModel.dart';
 
 class ProfilePage extends StatelessWidget {
@@ -28,12 +28,11 @@ class ProfilePage extends StatelessWidget {
                 headerSliverBuilder: (context, innerBoxIsScrolled) {
                   return <Widget>[
                     SliverAppBar(
-                      automaticallyImplyLeading: false,
-                      collapsedHeight: 0,
-                      expandedHeight: size.height * 0.2,
-                      toolbarHeight: 0,
-                      flexibleSpace: profileHeader(userModel: userModel),
-                    ),
+                        automaticallyImplyLeading: false,
+                        collapsedHeight: 0,
+                        expandedHeight: size.height * 0.2,
+                        toolbarHeight: 0,
+                        flexibleSpace: RequestHeader(userModel: userModel)),
                     SliverPersistentHeader(
                       delegate: _SliverAppBarDelegate(
                         const TabBar(
@@ -43,8 +42,8 @@ class ProfilePage extends StatelessWidget {
                           labelColor: Colors.blue,
                           labelStyle: TextStyle(fontWeight: FontWeight.bold),
                           tabs: [
+                            Tab(child: Text("Profie")),
                             Tab(child: Text("Requests")),
-                            Tab(child: Text("Helped")),
                           ],
                         ),
                       ),
@@ -54,14 +53,14 @@ class ProfilePage extends StatelessWidget {
                 },
                 body: TabBarView(
                   children: [
-                    RequestScreen(
+                    AboutTab(
                       userModel: userModel,
-                      isOnHomepage: false,
                       firebaseUser: firebaseUser,
                     ),
-                    HelpersScreen(
+                    RequestScreen(
                       userModel: userModel,
                       firebaseUser: firebaseUser,
+                      isOnHomepage: false,
                     ),
                   ],
                 ),

@@ -326,16 +326,16 @@ class _SetProfilePageState extends State<SetProfilePage> {
               ),
               ElevatedButton(
                 onPressed: () {
-                  FirestoreAuthServices.checkValues(
-                      collegevalue,
-                      widget.email,
-                      nameController.text.trim(),
-                      batchvalue,
-                      branchController.text.trim(),
-                      context,
-                      widget.firebaseUser,
-                      idcardimg,
-                      profilepicimg);
+                  // FirestoreAuthServices.checkValues(
+                  //     collegevalue,
+                  //     widget.email,
+                  //     nameController.text.trim(),
+                  //     batchvalue,
+                  //     branchController.text.trim(),
+                  //     context,
+                  //     widget.firebaseUser,
+                  //     idcardimg,
+                  //     profilepicimg);
                 },
                 child: SizedBox(
                   height: 45,

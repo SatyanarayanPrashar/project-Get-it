@@ -43,7 +43,8 @@ class _RequestScreenState extends State<RequestScreen> {
         builder: (context, requestNotifier, child) => Padding(
           padding: const EdgeInsets.only(left: 16, right: 16),
           child: FutureBuilder<QuerySnapshot>(
-            future: requestNotifier.fetchRequests(true, widget.userModel),
+            future: requestNotifier.fetchRequests(
+                widget.isOnHomepage, widget.userModel),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.done) {
                 if (snapshot.hasData) {

@@ -11,11 +11,13 @@ class commonTextField extends StatelessWidget {
       this.maxLine,
       this.enableToolTip,
       this.length,
-      this.disabletitle});
+      this.disabletitle,
+      this.enable});
 
   final String? title;
   String? tiptool = "";
   final bool? ispassword;
+  final bool? enable;
   final bool? disabletitle;
   final bool? enableToolTip;
   final String? hint;
@@ -76,6 +78,7 @@ class commonTextField extends StatelessWidget {
                 controller: inputcontroller,
                 obscureText: ispassword ?? false,
                 decoration: InputDecoration(
+                  enabled: enable ?? true,
                   hintText: hint ?? 'Enter $title',
                   hintStyle: const TextStyle(color: Colors.grey, fontSize: 14),
                   fillColor: Colors.white,

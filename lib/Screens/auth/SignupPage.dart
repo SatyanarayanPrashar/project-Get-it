@@ -1,10 +1,14 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/Screens/auth/SetProfilePage.dart';
 import 'package:get_it/Screens/auth/widgets/animatedButton.dart';
 import 'package:get_it/common/actionmessage.dart';
+import 'package:get_it/common/bottomSheet.dart';
 import 'package:get_it/common/commonTextField.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:get_it/models/collegeModel.dart';
 import 'package:get_it/models/userModel.dart';
+import 'package:get_it/services/fireStoreAuthServices.dart';
 
 class SignupPage extends StatefulWidget {
   const SignupPage({super.key});
@@ -16,27 +20,21 @@ class SignupPage extends StatefulWidget {
 class _SignupPageState extends State<SignupPage> {
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
-  TextEditingController cpasswordController = TextEditingController();
+  TextEditingController fullnameController = TextEditingController();
+  TextEditingController collegeController = TextEditingController();
+  TextEditingController addCllgController = TextEditingController();
+  TextEditingController searchController = TextEditingController();
 
   void signup() async {
     String email = emailController.text.trim();
     String password = passwordController.text.trim();
-    String cpassword = cpasswordController.text.trim();
+    String fullname = fullnameController.text.trim();
+    String college = collegeController.text.trim();
 
-    if (email == "" || password == "" || cpassword == "") {
+    if (email == "" || password == "" || college == "") {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Actionmessage(
-          message: 'Please fill all the details!',
-        ),
-        duration: Duration(seconds: 2),
-        behavior: SnackBarBehavior.floating,
-        elevation: 0,
-        backgroundColor: Colors.transparent,
-      ));
-    } else if (password != cpassword) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Actionmessage(
-          message: 'Passwords are not matching',
+          message: 'Please fill all the * details!',
         ),
         duration: Duration(seconds: 2),
         behavior: SnackBarBehavior.floating,
@@ -48,22 +46,15 @@ class _SignupPageState extends State<SignupPage> {
         UserCredential userCredential = await FirebaseAuth.instance
             .createUserWithEmailAndPassword(email: email, password: password);
         if (userCredential.user != null) {
-          Navigator.popUntil(context, (route) => route.isFirst);
-
-          Navigator.pushReplacement(context,
-              MaterialPageRoute(builder: (context) {
-            return SetProfilePage(
-              email: email,
-              firebaseUser: userCredential.user!,
-            );
-          }));
+          FirestoreAuthServices.signUp(
+              college, email, fullname, context, userCredential.user!);
         }
       } on FirebaseAuthException catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: Actionmessage(
             message: e.code.toString(),
           ),
-          duration: Duration(seconds: 2),
+          duration: const Duration(seconds: 2),
           behavior: SnackBarBehavior.floating,
           elevation: 0,
           backgroundColor: Colors.transparent,
@@ -109,19 +100,120 @@ class _SignupPageState extends State<SignupPage> {
               ),
               commonTextField(
                 inputcontroller: emailController,
-                title: "Email",
+                title: "Email*",
                 hint: "Enter your email",
+              ),
+              InkWell(
+                onTap: () async {
+                  showModalBottomSheet(
+                      backgroundColor: Colors.transparent,
+                      context: context,
+                      builder: (context) {
+                        return CustomBottomSheet(
+                            // height: size.height * 0.4,
+                            childern: [
+                              Column(
+                                children: [
+                                  Row(
+                                    children: [
+                                      Flexible(
+                                        child: commonTextField(
+                                          title: "Search your College",
+                                          hint: "enter your college name",
+                                          inputcontroller: searchController,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  SizedBox(
+                                    height: size.height * 0.3,
+                                    child: StreamBuilder(
+                                      stream: searchController.text.isEmpty
+                                          ? FirebaseFirestore.instance
+                                              .collection("College")
+                                              .snapshots()
+                                          : FirebaseFirestore.instance
+                                              .collection("College")
+                                              .where("name",
+                                                  isEqualTo:
+                                                      searchController.text)
+                                              .snapshots(),
+                                      builder: (context, snapshot) {
+                                        if (snapshot.connectionState ==
+                                            ConnectionState.active) {
+                                          if (snapshot.hasData) {
+                                            QuerySnapshot colleges =
+                                                snapshot.data as QuerySnapshot;
+                                            print(colleges.docs.length);
+                                            return colleges.docs.length != 0
+                                                ? ListView.builder(
+                                                    itemCount:
+                                                        colleges.docs.length,
+                                                    itemBuilder:
+                                                        (context, index) {
+                                                      CollegeModel cllg =
+                                                          CollegeModel.fromMap(
+                                                              colleges.docs[
+                                                                          index]
+                                                                      .data()
+                                                                  as Map<String,
+                                                                      dynamic>);
+                                                      return ListTile(
+                                                        dense: true,
+                                                        onTap: () {
+                                                          setState(() {
+                                                            collegeController
+                                                                    .text =
+                                                                cllg.name;
+                                                          });
+                                                          Navigator.pop(
+                                                              context);
+                                                        },
+                                                        title: Text(cllg.name),
+                                                      );
+                                                    },
+                                                  )
+                                                : Text(
+                                                    "add ${searchController.text} to community");
+                                          } else if (snapshot.hasError) {
+                                            return const Center(
+                                              child: Text(
+                                                  "somthing went wrong :("),
+                                            );
+                                          } else {
+                                            return const Center(
+                                              child: Text("No results found"),
+                                            );
+                                          }
+                                        } else {
+                                          return const Center(
+                                            child: CircularProgressIndicator(),
+                                          );
+                                        }
+                                      },
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ]);
+                      });
+                },
+                child: commonTextField(
+                  enable: false,
+                  inputcontroller: collegeController,
+                  title: "college*",
+                  hint: "Choose your College",
+                ),
+              ),
+              commonTextField(
+                inputcontroller: fullnameController,
+                title: "Username",
+                hint: "Enter your name",
               ),
               commonTextField(
                 inputcontroller: passwordController,
-                title: "Password",
+                title: "Password*",
                 hint: "Enter your password",
-                ispassword: true,
-              ),
-              commonTextField(
-                inputcontroller: cpasswordController,
-                title: "Confirm Password",
-                hint: "Reenter your password",
                 ispassword: true,
               ),
               ElevatedButton(
@@ -142,19 +234,27 @@ class _SignupPageState extends State<SignupPage> {
                   ),
                 ),
               ),
-              // Padding(
-              //   padding: const EdgeInsets.only(top: 16),
-              //   child: InkWell(
-              //     onTap: () {
-              //       // Authentication here
-              //       print("tapped");
-              //     },
-              //     child: const Button(
-              //         buttonText:
-              //             "For seamless one-tap Sign Up, please use your Google account to continue."),
-              //   ),
-              // ),
-              const SizedBox(height: 57),
+              const SizedBox(height: 17),
+              Column(
+                children: [
+                  const Text("By Signing up you are agreegin to Getit's"),
+                  InkWell(
+                    onTap: () {
+                      Navigator.pop(context);
+                    },
+                    child: const Text(
+                      "Terms and Conditions",
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.blue,
+                        letterSpacing: 1,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 7),
               const Text("Already have an account?"),
               InkWell(
                 onTap: () {

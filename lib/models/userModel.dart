@@ -7,6 +7,7 @@ class UserModel {
   String? idCard;
   String? batch;
   String? branch;
+  bool? profileComplete;
 
   UserModel(
       {this.uid,
@@ -16,7 +17,8 @@ class UserModel {
       this.profilepic,
       this.idCard,
       this.batch,
-      this.branch});
+      this.branch,
+      this.profileComplete});
 
   UserModel.fromMap(Map<String, dynamic> map) {
     uid = map["uid"];
@@ -27,6 +29,7 @@ class UserModel {
     idCard = map["idCard"];
     batch = map["batch"];
     branch = map["branch"];
+    profileComplete = map["profileComplete"];
   }
 
   Map<String, dynamic> toMap() {
@@ -39,6 +42,7 @@ class UserModel {
       "idCard": idCard,
       "branch": branch,
       "batch": batch,
+      "profileComplete": profileComplete,
     };
   }
 }

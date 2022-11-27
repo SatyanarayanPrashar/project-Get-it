@@ -10,57 +10,49 @@ import 'package:get_it/models/localStorage.dart';
 import 'package:get_it/models/userModel.dart';
 
 class FirestoreAuthServices {
-  static Future<void> checkValues(
-    String collegevalue,
+  static Future<void> signUp(
+    String college,
     String email,
     String fullname,
-    String batchvalue,
-    String branch,
     BuildContext context,
     User firebaseUser,
-    File? idcardimg,
-    File? profilepicimg,
   ) async {
-    if (idcardimg == null) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Actionmessage(
-          message: 'Please upload idCard!',
-        ),
-        duration: Duration(seconds: 2),
-        behavior: SnackBarBehavior.floating,
-        elevation: 0,
-        backgroundColor: Colors.transparent,
-      ));
-    } else if (profilepicimg == null) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Actionmessage(
-          message: 'Please upload Profile picture!',
-        ),
-        duration: Duration(seconds: 2),
-        behavior: SnackBarBehavior.floating,
-        elevation: 0,
-        backgroundColor: Colors.transparent,
-      ));
-    } else if (fullname != null ||
-        collegevalue.isEmpty ||
-        branch != null ||
-        batchvalue.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Actionmessage(
-          message: 'Please fill all the details',
-        ),
-        duration: Duration(seconds: 2),
-        behavior: SnackBarBehavior.floating,
-        elevation: 0,
-        backgroundColor: Colors.transparent,
-      ));
-    } else {
-      FirestoreAuthServices.createProfile(collegevalue, email, fullname,
-          batchvalue, branch, context, firebaseUser, idcardimg, profilepicimg);
-    }
+    String? uid = FirebaseAuth.instance.currentUser!.uid;
+
+    UserModel newUser = UserModel(
+      uid: uid,
+      email: email,
+      college: college,
+      profileComplete: false,
+      fullname: fullname,
+      batch: "",
+      branch: "",
+      idCard: "",
+      profilepic: "",
+    );
+    FirebaseFirestore.instance
+        .collection("College")
+        .doc(college)
+        .collection("users")
+        .doc(uid)
+        .set(newUser.toMap())
+        .then((value) {
+      LocalStorage.saveCollege(college);
+
+      FirebaseFirestore.instance
+          .collection("College")
+          .doc(college)
+          .update({"userCount": FieldValue.increment(1)});
+      Navigator.popUntil(context, (route) => route.isFirst);
+
+      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) {
+        return bottomNav(firebaseUser: firebaseUser, userModel: newUser);
+      }));
+    });
   }
 
   static Future<void> createProfile(
+    UserModel userModel,
     String collegevalue,
     String email,
     String fullname,
@@ -72,20 +64,29 @@ class FirestoreAuthServices {
     File? profilepicimg,
   ) async {
     String? uid = FirebaseAuth.instance.currentUser!.uid;
+    String? idcardURL;
+    String? profilepicURL;
 
-    UploadTask uploadidcard = FirebaseStorage.instance
-        .ref("profilepictures")
-        .child("${uid}idcard")
-        .putFile(idcardimg ?? File("assets/Images/auth.jpg"));
-    UploadTask uploadprofilepic = FirebaseStorage.instance
-        .ref("profilepictures")
-        .child("${uid}profilepic")
-        .putFile(profilepicimg ?? File("assets/Images/auth.jpg"));
-    TaskSnapshot snapshotprofilepic = await uploadprofilepic;
-    TaskSnapshot snapshotidcard = await uploadidcard;
-
-    String? profilepicURL = await snapshotprofilepic.ref.getDownloadURL();
-    String? idcardURL = await snapshotidcard.ref.getDownloadURL();
+    if (idcardimg != null) {
+      UploadTask uploadidcard = FirebaseStorage.instance
+          .ref("profilepictures")
+          .child("${uid}idcard")
+          .putFile(idcardimg);
+      TaskSnapshot snapshotidcard = await uploadidcard;
+      idcardURL = await snapshotidcard.ref.getDownloadURL();
+    } else {
+      idcardURL = userModel.idCard;
+    }
+    if (profilepicimg != null) {
+      UploadTask uploadprofilepic = FirebaseStorage.instance
+          .ref("profilepictures")
+          .child("${uid}profilepic")
+          .putFile(profilepicimg);
+      TaskSnapshot snapshotprofilepic = await uploadprofilepic;
+      profilepicURL = await snapshotprofilepic.ref.getDownloadURL();
+    } else {
+      profilepicURL = userModel.profilepic;
+    }
 
     UserModel newUser = UserModel(
       uid: uid,
