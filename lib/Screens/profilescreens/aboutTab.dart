@@ -6,6 +6,7 @@ import 'package:get_it/Screens/auth/LoginPage.dart';
 import 'package:get_it/common/bottomSheet.dart';
 import 'package:get_it/common/commonTextField.dart';
 import 'package:get_it/common/custom_confirmation_dialog.dart';
+import 'package:get_it/common/loadingDialoge.dart';
 import 'package:get_it/models/userModel.dart';
 import 'package:get_it/services/fireStoreAuthServices.dart';
 import 'package:image_picker/image_picker.dart';
@@ -132,6 +133,8 @@ class _AboutTabState extends State<AboutTab> {
   }
 
   void logout() async {
+    UIHelper.showLoadingDialog(context, "Logging In..");
+
     await FirebaseAuth.instance.signOut().then((value) {
       Navigator.popUntil(context, (route) => route.isFirst);
       Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) {

@@ -6,6 +6,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/Screens/bttomNav.dart';
 import 'package:get_it/common/actionmessage.dart';
+import 'package:get_it/common/loadingDialoge.dart';
 import 'package:get_it/models/localStorage.dart';
 import 'package:get_it/models/userModel.dart';
 
@@ -17,6 +18,8 @@ class FirestoreAuthServices {
     BuildContext context,
     User firebaseUser,
   ) async {
+    UIHelper.showLoadingDialog(context, "Logging In..");
+
     String? uid = FirebaseAuth.instance.currentUser!.uid;
 
     UserModel newUser = UserModel(
@@ -63,6 +66,8 @@ class FirestoreAuthServices {
     File? idcardimg,
     File? profilepicimg,
   ) async {
+    UIHelper.showLoadingDialog(context, "Saving");
+
     String? uid = FirebaseAuth.instance.currentUser!.uid;
     String? idcardURL;
     String? profilepicURL;
@@ -89,15 +94,16 @@ class FirestoreAuthServices {
     }
 
     UserModel newUser = UserModel(
-      uid: uid,
-      email: email,
-      college: collegevalue,
-      fullname: fullname,
-      batch: batchvalue,
-      branch: branch,
-      idCard: idcardURL,
-      profilepic: profilepicURL,
-    );
+        uid: uid,
+        email: email,
+        college: collegevalue,
+        fullname: fullname,
+        batch: batchvalue,
+        branch: branch,
+        idCard: idcardURL,
+        profilepic: profilepicURL,
+        profileComplete:
+            (idcardimg != null && idcardimg != "" && fullname != ""));
     FirebaseFirestore.instance
         .collection("College")
         .doc(collegevalue)
@@ -124,6 +130,7 @@ class FirestoreAuthServices {
       TextEditingController passwordController,
       String collegevalue,
       BuildContext context) async {
+    UIHelper.showLoadingDialog(context, "Logging In..");
     String email = emailController.text.trim();
     String password = passwordController.text.trim();
 

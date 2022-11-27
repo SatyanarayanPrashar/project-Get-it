@@ -1,13 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:get_it/Screens/auth/SetProfilePage.dart';
-import 'package:get_it/Screens/auth/widgets/animatedButton.dart';
 import 'package:get_it/common/actionmessage.dart';
 import 'package:get_it/common/bottomSheet.dart';
 import 'package:get_it/common/commonTextField.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get_it/models/collegeModel.dart';
-import 'package:get_it/models/userModel.dart';
 import 'package:get_it/services/fireStoreAuthServices.dart';
 
 class SignupPage extends StatefulWidget {

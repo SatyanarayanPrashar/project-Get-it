@@ -119,7 +119,7 @@ class _ChatPageState extends State<ChatPage> {
                                                 },
                                                 leading: CircleAvatar(
                                                   backgroundImage: NetworkImage(
-                                                      targetUser.idCard ??
+                                                      targetUser.profilepic ??
                                                           "https://firebasestorage.googleapis.com/v0/b/get-it-8a8a7.appspot.com/o/profilepictures%2FpraposalHome.png?alt=media&token=6ea273da-f64b-4c30-b6ef-7770d8ac6b82"),
                                                   backgroundColor: Colors.blue,
                                                 ),

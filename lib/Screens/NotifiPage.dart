@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get_it/common/loadingDialoge.dart';
 
 class NotifPage extends StatelessWidget {
   const NotifPage({super.key});
@@ -7,7 +8,11 @@ class NotifPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
-        child: Text("Notifications"),
+        child: InkWell(
+            onTap: () {
+              UIHelper.showLoadingDialog(context, "Logging in...");
+            },
+            child: Text("Notifications")),
       ),
     );
   }

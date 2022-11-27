@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get_it/Screens/bttomNav.dart';
 import 'package:get_it/Screens/chat/chatroom.dart';
 import 'package:get_it/common/actionmessage.dart';
+import 'package:get_it/common/loadingDialoge.dart';
 import 'package:get_it/models/chatRoomModel.dart';
 import 'package:get_it/models/firebaseHelper.dart';
 import 'package:get_it/models/requestModel.dart';
@@ -55,70 +56,82 @@ class RequestServices extends ChangeNotifier {
         await FirebaseHelper.getUserModelById(helperUid, userModel.college);
     ChatRoomModel? chatRoomModel = await FirestoreChatServices.getChatRoomModel(
         targetModel ?? userModel, userModel, requestid);
-
-    if (getitBycontroller.text.isNotEmpty) {
-      if (onecontroller.text.isNotEmpty) {
-        if (onequantitycontroller.text.isNotEmpty) {
-          if (pricecontroller.text.isNotEmpty) {
-            RequestModel newRequest = RequestModel(
-              requestid: requestid,
-              getby: getitBycontroller.text,
-              requestedBy: userModel.fullname,
-              requesterProfilePic: userModel.profilepic,
-              requesterUid: userModel.uid,
-              requestedOn: DateTime.now(),
-              price: pricecontroller.text,
-              note: note,
-              one: onecontroller.text.trim(),
-              two: two,
-              three: three,
-              oneQuantity: onequantitycontroller.text.trim(),
-              twoQuantity: twoQuantity,
-              threeQuantity: threeQuantity,
-              status: "pending",
-              personalised: sendtohelperonly,
-            );
-            FirebaseFirestore.instance
-                .collection("College")
-                .doc(userModel.college)
-                .collection("requests")
-                .doc(requestid)
-                .set(newRequest.toMap())
-                .then((value) {
-              isitPersonalised ?? false
-                  ? chatRoomModel != null
-                      ? Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) {
-                              return ChatScreen(
-                                accessedFrom: "request",
-                                targetUser: targetModel ?? userModel,
-                                userModel: userModel,
-                                firebaseUser: firebaseUser,
-                                chatRoomModel: chatRoomModel,
-                                requestModel: newRequest,
-                              );
-                            },
-                          ),
-                        )
-                      : print("failed")
-                  : Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) {
-                          return bottomNav(
-                            userModel: userModel,
-                            firebaseUser: firebaseUser,
-                          );
-                        },
-                      ),
-                    );
-            });
+    if (userModel.profileComplete ?? true) {
+      if (getitBycontroller.text.isNotEmpty) {
+        if (onecontroller.text.isNotEmpty) {
+          if (onequantitycontroller.text.isNotEmpty) {
+            if (pricecontroller.text.isNotEmpty) {
+              UIHelper.showLoadingDialog(context, "");
+              RequestModel newRequest = RequestModel(
+                requestid: requestid,
+                getby: getitBycontroller.text,
+                requestedBy: userModel.fullname,
+                requesterProfilePic: userModel.profilepic,
+                requesterUid: userModel.uid,
+                requestedOn: DateTime.now(),
+                price: pricecontroller.text,
+                note: note,
+                one: onecontroller.text.trim(),
+                two: two,
+                three: three,
+                oneQuantity: onequantitycontroller.text.trim(),
+                twoQuantity: twoQuantity,
+                threeQuantity: threeQuantity,
+                status: "pending",
+                personalised: sendtohelperonly,
+              );
+              FirebaseFirestore.instance
+                  .collection("College")
+                  .doc(userModel.college)
+                  .collection("requests")
+                  .doc(requestid)
+                  .set(newRequest.toMap())
+                  .then((value) {
+                isitPersonalised ?? false
+                    ? chatRoomModel != null
+                        ? Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) {
+                                return ChatScreen(
+                                  accessedFrom: "request",
+                                  targetUser: targetModel ?? userModel,
+                                  userModel: userModel,
+                                  firebaseUser: firebaseUser,
+                                  chatRoomModel: chatRoomModel,
+                                  requestModel: newRequest,
+                                );
+                              },
+                            ),
+                          )
+                        : print("failed")
+                    : Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) {
+                            return bottomNav(
+                              userModel: userModel,
+                              firebaseUser: firebaseUser,
+                            );
+                          },
+                        ),
+                      );
+              });
+            } else {
+              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                content: Actionmessage(
+                  message: 'Please enter the price you can offer!',
+                ),
+                duration: Duration(seconds: 2),
+                behavior: SnackBarBehavior.floating,
+                elevation: 0,
+                backgroundColor: Colors.transparent,
+              ));
+            }
           } else {
             ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
               content: Actionmessage(
-                message: 'Please enter the price you can offer!',
+                message: 'Please enter item ones quantity!',
               ),
               duration: Duration(seconds: 2),
               behavior: SnackBarBehavior.floating,
@@ -129,7 +142,7 @@ class RequestServices extends ChangeNotifier {
         } else {
           ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
             content: Actionmessage(
-              message: 'Please enter item ones quantity!',
+              message: 'Please enter the item 1!',
             ),
             duration: Duration(seconds: 2),
             behavior: SnackBarBehavior.floating,
@@ -140,7 +153,7 @@ class RequestServices extends ChangeNotifier {
       } else {
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
           content: Actionmessage(
-            message: 'Please enter the item 1!',
+            message: 'Please enter get it by!',
           ),
           duration: Duration(seconds: 2),
           behavior: SnackBarBehavior.floating,
@@ -151,7 +164,7 @@ class RequestServices extends ChangeNotifier {
     } else {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Actionmessage(
-          message: 'Please enter get it by!',
+          message: 'Please Complete your profile!',
         ),
         duration: Duration(seconds: 2),
         behavior: SnackBarBehavior.floating,
@@ -178,51 +191,65 @@ class RequestServices extends ChangeNotifier {
       bool sendtohelperonly,
       bool? isitPersonalised,
       BuildContext context) async {
-    if (getitBycontroller.text.isNotEmpty) {
-      if (onecontroller.text.isNotEmpty) {
-        if (onequantitycontroller.text.isNotEmpty) {
-          if (pricecontroller.text.isNotEmpty) {
-            RequestModel newRequest = RequestModel(
-              requestid: requestid,
-              getby: getitBycontroller.text,
-              requestedBy: userModel.fullname,
-              requesterProfilePic: userModel.profilepic,
-              requesterUid: userModel.uid,
-              requestedOn: DateTime.now(),
-              price: pricecontroller.text,
-              note: note,
-              one: onecontroller.text.trim(),
-              two: two,
-              three: three,
-              oneQuantity: onequantitycontroller.text.trim(),
-              twoQuantity: twoQuantity,
-              threeQuantity: threeQuantity,
-              status: "pending",
-              personalised: sendtohelperonly,
-            );
-            FirebaseFirestore.instance
-                .collection("College")
-                .doc(userModel.college)
-                .collection("requests")
-                .doc(requestid)
-                .set(newRequest.toMap())
-                .then((value) {
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(
-                  builder: (context) {
-                    return bottomNav(
-                      userModel: userModel,
-                      firebaseUser: firebaseUser,
-                    );
-                  },
-                ),
+    if (userModel.profileComplete ?? true) {
+      if (getitBycontroller.text.isNotEmpty) {
+        if (onecontroller.text.isNotEmpty) {
+          if (onequantitycontroller.text.isNotEmpty) {
+            if (pricecontroller.text.isNotEmpty) {
+              UIHelper.showLoadingDialog(context, "");
+
+              RequestModel newRequest = RequestModel(
+                requestid: requestid,
+                getby: getitBycontroller.text,
+                requestedBy: userModel.fullname,
+                requesterProfilePic: userModel.profilepic,
+                requesterUid: userModel.uid,
+                requestedOn: DateTime.now(),
+                price: pricecontroller.text,
+                note: note,
+                one: onecontroller.text.trim(),
+                two: two,
+                three: three,
+                oneQuantity: onequantitycontroller.text.trim(),
+                twoQuantity: twoQuantity,
+                threeQuantity: threeQuantity,
+                status: "pending",
+                personalised: sendtohelperonly,
               );
-            });
+              FirebaseFirestore.instance
+                  .collection("College")
+                  .doc(userModel.college)
+                  .collection("requests")
+                  .doc(requestid)
+                  .set(newRequest.toMap())
+                  .then((value) {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) {
+                      return bottomNav(
+                        userModel: userModel,
+                        firebaseUser: firebaseUser,
+                      );
+                    },
+                  ),
+                );
+              });
+            } else {
+              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                content: Actionmessage(
+                  message: 'Please enter the price you can offer!',
+                ),
+                duration: Duration(seconds: 2),
+                behavior: SnackBarBehavior.floating,
+                elevation: 0,
+                backgroundColor: Colors.transparent,
+              ));
+            }
           } else {
             ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
               content: Actionmessage(
-                message: 'Please enter the price you can offer!',
+                message: 'Please enter item ones quantity!',
               ),
               duration: Duration(seconds: 2),
               behavior: SnackBarBehavior.floating,
@@ -233,7 +260,7 @@ class RequestServices extends ChangeNotifier {
         } else {
           ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
             content: Actionmessage(
-              message: 'Please enter item ones quantity!',
+              message: 'Please enter the item 1!',
             ),
             duration: Duration(seconds: 2),
             behavior: SnackBarBehavior.floating,
@@ -244,7 +271,7 @@ class RequestServices extends ChangeNotifier {
       } else {
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
           content: Actionmessage(
-            message: 'Please enter the item 1!',
+            message: 'Please enter get it by!',
           ),
           duration: Duration(seconds: 2),
           behavior: SnackBarBehavior.floating,
@@ -255,7 +282,7 @@ class RequestServices extends ChangeNotifier {
     } else {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Actionmessage(
-          message: 'Please enter get it by!',
+          message: 'Please Complete your profile!',
         ),
         duration: Duration(seconds: 2),
         behavior: SnackBarBehavior.floating,

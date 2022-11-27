@@ -212,7 +212,7 @@ class _RequestTileState extends State<RequestTile> {
                                           showConfirmationDialog(
                                               context: context,
                                               message:
-                                                  "Are you sure you want to Log out?",
+                                                  "Are you sure you want to delete this request?",
                                               onPress: () {
                                                 //
                                                 deleteRequest();
