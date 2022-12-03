@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/Screens/HomePage/requestTile.dart';
 import 'package:get_it/Screens/insiderScreens/RequestFormPage.dart';
+import 'package:get_it/common/actionmessage.dart';
 import 'package:get_it/models/requestModel.dart';
 import 'package:get_it/models/userModel.dart';
 import 'package:get_it/services/firebaseRequestServices.dart';
@@ -28,13 +29,23 @@ class _RequestScreenState extends State<RequestScreen> {
     return Scaffold(
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          Navigator.push(context, MaterialPageRoute(builder: (context) {
-            return RequestForm(
-              userModel: widget.userModel,
-              firebaseUser: widget.firebaseUser,
-              helperUid: "No helper required",
-            );
-          }));
+          widget.userModel.profileComplete ?? true
+              ? Navigator.push(context, MaterialPageRoute(builder: (context) {
+                  return RequestForm(
+                    userModel: widget.userModel,
+                    firebaseUser: widget.firebaseUser,
+                    helperUid: "No helper required",
+                  );
+                }))
+              : ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                  content: Actionmessage(
+                    message: 'Please Complete your profile!',
+                  ),
+                  duration: Duration(seconds: 2),
+                  behavior: SnackBarBehavior.floating,
+                  elevation: 0,
+                  backgroundColor: Colors.transparent,
+                ));
         },
         backgroundColor: Colors.blue,
         child: const Icon(Icons.add),

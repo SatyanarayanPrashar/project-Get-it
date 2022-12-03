@@ -39,12 +39,13 @@ class HelperService extends ChangeNotifier {
           .collection("helpers")
           .doc(helpUid)
           .set(newhelper.toMap());
-      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) {
+      Navigator.pushAndRemoveUntil(context,
+          MaterialPageRoute(builder: (context) {
         return bottomNav(
           userModel: userModel,
           firebaseUser: firebaseUser,
         );
-      }));
+      }), (route) => false);
     }
   }
 }

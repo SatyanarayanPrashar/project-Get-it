@@ -159,13 +159,6 @@ class _AboutTabState extends State<AboutTab> {
                   onTap: () {
                     isEditClicked
                         ? null
-                        // ? showConfirmationDialog(
-                        //     context: context,
-                        //     message: "Cancel Changes?",
-                        //     onPress: () {
-                        //       Navigator.pop(context);
-                        //       setState(() {});
-                        //     })
                         : showConfirmationDialog(
                             context: context,
                             message: "Are you sure you want to Log out?",
@@ -202,7 +195,7 @@ class _AboutTabState extends State<AboutTab> {
                 InkWell(
                   onTap: () {
                     isEditClicked
-                        ? FirestoreAuthServices.createProfile(
+                        ? FirestoreAuthServices.editProfile(
                             widget.userModel,
                             widget.userModel.college ?? "",
                             widget.userModel.email ?? "",
@@ -257,69 +250,77 @@ class _AboutTabState extends State<AboutTab> {
               ],
             ),
             Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  widget.userModel.profilepic != null
-                      ? InkWell(
-                          onTap: () async {
-                            PermissionStatus storageStatus =
-                                await Permission.storage.request();
-                            if (storageStatus == PermissionStatus.granted) {
-                              showprofileoption();
-                            } else if (storageStatus ==
-                                PermissionStatus.denied) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content:
-                                      Text("This permission is recommended"),
-                                ),
-                              );
-                            } else if (storageStatus ==
-                                PermissionStatus.permanentlyDenied) {
-                              openAppSettings();
-                            }
-                          },
-                          child: (profilepicimg != null)
-                              ? CircleAvatar(
-                                  radius: size.width * 0.15,
-                                  backgroundImage: FileImage(profilepicimg!))
-                              : CircleAvatar(
-                                  radius: size.width * 0.15,
-                                  backgroundImage: NetworkImage(
-                                      widget.userModel.profilepic ?? ""),
-                                ),
-                        )
-                      : InkWell(
-                          onTap: () async {
-                            PermissionStatus storageStatus =
-                                await Permission.storage.request();
-                            if (storageStatus == PermissionStatus.granted) {
-                              showprofileoption();
-                            } else if (storageStatus ==
-                                PermissionStatus.denied) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content:
-                                      Text("This permission is recommended"),
-                                ),
-                              );
-                            } else if (storageStatus ==
-                                PermissionStatus.permanentlyDenied) {
-                              openAppSettings();
-                            }
-                          },
-                          child: CircleAvatar(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                widget.userModel.profilepic != null
+                    ? isEditClicked
+                        ? InkWell(
+                            onTap: () async {
+                              PermissionStatus storageStatus =
+                                  await Permission.storage.request();
+                              if (storageStatus == PermissionStatus.granted) {
+                                showprofileoption();
+                              } else if (storageStatus ==
+                                  PermissionStatus.denied) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content:
+                                        Text("This permission is recommended"),
+                                  ),
+                                );
+                              } else if (storageStatus ==
+                                  PermissionStatus.permanentlyDenied) {
+                                openAppSettings();
+                              }
+                            },
+                            child: (profilepicimg != null)
+                                ? CircleAvatar(
+                                    radius: size.width * 0.15,
+                                    backgroundImage: FileImage(profilepicimg!))
+                                : CircleAvatar(
+                                    radius: size.width * 0.15,
+                                    backgroundImage: NetworkImage(
+                                        widget.userModel.profilepic ?? ""),
+                                    child: Icon(Icons.person,
+                                        size: size.width * 0.12),
+                                  ),
+                          )
+                        : CircleAvatar(
                             radius: size.width * 0.15,
-                            backgroundImage: (profilepicimg != null)
-                                ? FileImage(profilepicimg!)
-                                : null,
                             backgroundColor:
                                 const Color.fromARGB(255, 177, 220, 255),
-                          ),
+                            child: Icon(Icons.person, size: size.width * 0.12),
+                          )
+                    : InkWell(
+                        onTap: () async {
+                          PermissionStatus storageStatus =
+                              await Permission.storage.request();
+                          if (storageStatus == PermissionStatus.granted) {
+                            showprofileoption();
+                          } else if (storageStatus == PermissionStatus.denied) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text("This permission is recommended"),
+                              ),
+                            );
+                          } else if (storageStatus ==
+                              PermissionStatus.permanentlyDenied) {
+                            openAppSettings();
+                          }
+                        },
+                        child: CircleAvatar(
+                          radius: size.width * 0.15,
+                          backgroundImage: (profilepicimg != null)
+                              ? FileImage(profilepicimg!)
+                              : null,
+                          backgroundColor:
+                              const Color.fromARGB(255, 177, 220, 255),
                         ),
-                  const SizedBox(width: 11),
-                ]),
+                      ),
+                const SizedBox(width: 11),
+              ],
+            ),
             const SizedBox(height: 16),
             isEditClicked
                 ? commonTextField(

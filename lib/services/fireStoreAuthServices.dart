@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:get_it/Screens/bttomNav.dart';
 import 'package:get_it/common/actionmessage.dart';
 import 'package:get_it/common/loadingDialoge.dart';
+import 'package:get_it/models/collegeModel.dart';
 import 'package:get_it/models/localStorage.dart';
 import 'package:get_it/models/userModel.dart';
 
@@ -54,7 +55,18 @@ class FirestoreAuthServices {
     });
   }
 
-  static Future<void> createProfile(
+  static Future<void> createCommunity(String community) async {
+    CollegeModel newCollege = CollegeModel(
+      name: community,
+      userCount: 0,
+    );
+    FirebaseFirestore.instance
+        .collection("College")
+        .doc(community)
+        .set(newCollege.toMap());
+  }
+
+  static Future<void> editProfile(
     UserModel userModel,
     String collegevalue,
     String email,
@@ -113,10 +125,6 @@ class FirestoreAuthServices {
         .then((value) {
       LocalStorage.saveCollege(collegevalue);
 
-      FirebaseFirestore.instance
-          .collection("College")
-          .doc(collegevalue)
-          .update({"userCount": FieldValue.increment(1)});
       Navigator.popUntil(context, (route) => route.isFirst);
 
       Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) {

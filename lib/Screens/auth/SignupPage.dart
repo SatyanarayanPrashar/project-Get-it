@@ -170,8 +170,18 @@ class _SignupPageState extends State<SignupPage> {
                                                       );
                                                     },
                                                   )
-                                                : Text(
-                                                    "add ${searchController.text} to community");
+                                                : TextButton(
+                                                    onPressed: () {
+                                                      FirestoreAuthServices
+                                                          .createCommunity(
+                                                              searchController
+                                                                  .text
+                                                                  .trim());
+                                                      Navigator.pop(context);
+                                                    },
+                                                    child: Text(
+                                                        "add ${searchController.text} to community"),
+                                                  );
                                           } else if (snapshot.hasError) {
                                             return const Center(
                                               child: Text(

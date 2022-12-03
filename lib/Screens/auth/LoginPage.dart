@@ -129,8 +129,14 @@ class _LoginPageState extends State<LoginPage> {
                                                       );
                                                     },
                                                   )
-                                                : Text(
-                                                    "add ${searchController.text} to community");
+                                                : Column(
+                                                    children: [
+                                                      Text(
+                                                          "${searchController.text} not found"),
+                                                      const Text(
+                                                          "Please try searching with correct name")
+                                                    ],
+                                                  );
                                           } else if (snapshot.hasError) {
                                             return const Center(
                                               child: Text(

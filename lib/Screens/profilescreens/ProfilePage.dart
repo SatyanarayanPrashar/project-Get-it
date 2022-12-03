@@ -42,7 +42,7 @@ class ProfilePage extends StatelessWidget {
                           labelColor: Colors.blue,
                           labelStyle: TextStyle(fontWeight: FontWeight.bold),
                           tabs: [
-                            Tab(child: Text("Profie")),
+                            Tab(child: Text("Profile")),
                             Tab(child: Text("Requests")),
                           ],
                         ),

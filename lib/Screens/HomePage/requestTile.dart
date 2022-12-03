@@ -163,7 +163,7 @@ class _RequestTileState extends State<RequestTile> {
                 ? Container()
                 : Row(
                     children: [
-                      // Avatar , about and options
+                      // Avatar, about and options
                       CircleAvatar(
                         radius: 20,
                         backgroundImage: NetworkImage(widget.profilePic ?? ""),
@@ -216,7 +216,6 @@ class _RequestTileState extends State<RequestTile> {
                                               onPress: () {
                                                 //
                                                 deleteRequest();
-                                                print("torefresh");
                                                 widget.refresh;
                                               });
                                         },
@@ -401,9 +400,27 @@ class _RequestTileState extends State<RequestTile> {
                                       //   )
                                       : SlideAction(
                                           onSubmit: () {
-                                            setState(() {
-                                              isHelpPressed = true;
-                                            });
+                                            widget.loggedUserModel
+                                                        .profileComplete ??
+                                                    true
+                                                ? setState(() {
+                                                    isHelpPressed = true;
+                                                  })
+                                                : ScaffoldMessenger.of(context)
+                                                    .showSnackBar(
+                                                        const SnackBar(
+                                                    content: Actionmessage(
+                                                      message:
+                                                          'Please Complete your profile!',
+                                                    ),
+                                                    duration:
+                                                        Duration(seconds: 2),
+                                                    behavior: SnackBarBehavior
+                                                        .floating,
+                                                    elevation: 0,
+                                                    backgroundColor:
+                                                        Colors.transparent,
+                                                  ));
                                           },
                                           outerColor: Colors.blue,
                                           submittedIcon: const Icon(

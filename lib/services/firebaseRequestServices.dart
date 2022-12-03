@@ -105,17 +105,13 @@ class RequestServices extends ChangeNotifier {
                             ),
                           )
                         : print("failed")
-                    : Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) {
-                            return bottomNav(
-                              userModel: userModel,
-                              firebaseUser: firebaseUser,
-                            );
-                          },
-                        ),
-                      );
+                    : Navigator.pushAndRemoveUntil(context,
+                        MaterialPageRoute(builder: (context) {
+                        return bottomNav(
+                          userModel: userModel,
+                          firebaseUser: firebaseUser,
+                        );
+                      }), (route) => false);
               });
             } else {
               ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
@@ -223,17 +219,13 @@ class RequestServices extends ChangeNotifier {
                   .doc(requestid)
                   .set(newRequest.toMap())
                   .then((value) {
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) {
-                      return bottomNav(
-                        userModel: userModel,
-                        firebaseUser: firebaseUser,
-                      );
-                    },
-                  ),
-                );
+                Navigator.pushAndRemoveUntil(context,
+                    MaterialPageRoute(builder: (context) {
+                  return bottomNav(
+                    userModel: userModel,
+                    firebaseUser: firebaseUser,
+                  );
+                }), (route) => false);
               });
             } else {
               ScaffoldMessenger.of(context).showSnackBar(const SnackBar(

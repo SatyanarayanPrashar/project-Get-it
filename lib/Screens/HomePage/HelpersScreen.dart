@@ -4,6 +4,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/Screens/insiderScreens/HelperForm.dart';
 import 'package:get_it/Screens/insiderScreens/RequestFormPage.dart';
+import 'package:get_it/common/actionmessage.dart';
+import 'package:get_it/common/bottomSheet.dart';
+import 'package:get_it/common/bottomsheetItem.dart';
+import 'package:get_it/common/custom_confirmation_dialog.dart';
 import 'package:get_it/models/helperModel.dart';
 import 'package:get_it/services/firebaseHelperService.dart';
 import 'package:provider/provider.dart';
@@ -27,12 +31,22 @@ class _HelpersScreenState extends State<HelpersScreen> {
     return Scaffold(
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          Navigator.push(context, MaterialPageRoute(builder: (context) {
-            return HelperFormPage(
-              userModel: widget.userModel,
-              firebaseUser: widget.firebaseUser,
-            );
-          }));
+          widget.userModel.profileComplete ?? true
+              ? Navigator.push(context, MaterialPageRoute(builder: (context) {
+                  return HelperFormPage(
+                    userModel: widget.userModel,
+                    firebaseUser: widget.firebaseUser,
+                  );
+                }))
+              : ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                  content: Actionmessage(
+                    message: 'Please Complete your profile!',
+                  ),
+                  duration: Duration(seconds: 2),
+                  behavior: SnackBarBehavior.floating,
+                  elevation: 0,
+                  backgroundColor: Colors.transparent,
+                ));
         },
         backgroundColor: Colors.blue,
         child: const Icon(Icons.add),
@@ -53,31 +67,31 @@ class _HelpersScreenState extends State<HelpersScreen> {
                           // helperNotifier.fetchHelpers(widget.userModel);
                         });
                       },
-                      child: ListView.builder(
-                        itemCount: requestSnapshot.docs.length,
-                        itemBuilder: (context, index) {
-                          HelperModel currentHelper = HelperModel.fromMap(
-                              requestSnapshot.docs[index].data()
-                                  as Map<String, dynamic>);
-
-                          return requestSnapshot.docs.length == 0
-                              ? Column(
-                                  children: [
-                                    Row(),
-                                    Container(
-                                      height: 250,
-                                      width: 250,
-                                      decoration: const BoxDecoration(
-                                        image: DecorationImage(
-                                          image: AssetImage(
-                                              "assets/Images/auth.jpg"),
-                                        ),
-                                      ),
+                      child: requestSnapshot.docs.length == 0
+                          ? Column(
+                              children: [
+                                Row(),
+                                Container(
+                                  height: 250,
+                                  width: 250,
+                                  decoration: const BoxDecoration(
+                                    image: DecorationImage(
+                                      image:
+                                          AssetImage("assets/Images/auth.jpg"),
                                     ),
-                                    Text("No Helpers Yet!")
-                                  ],
-                                )
-                              : Column(
+                                  ),
+                                ),
+                                Text("No Helpers Yet!")
+                              ],
+                            )
+                          : ListView.builder(
+                              itemCount: requestSnapshot.docs.length,
+                              itemBuilder: (context, index) {
+                                HelperModel currentHelper = HelperModel.fromMap(
+                                    requestSnapshot.docs[index].data()
+                                        as Map<String, dynamic>);
+
+                                return Column(
                                   children: [
                                     HelperTile(
                                       userModel: widget.userModel,
@@ -91,6 +105,7 @@ class _HelpersScreenState extends State<HelpersScreen> {
                                       note: currentHelper.note,
                                       profilepic:
                                           currentHelper.helperProfilePic,
+                                      helpId: currentHelper.helpUid ?? "",
                                     ),
                                     index == requestSnapshot.docs.length - 1
                                         ? const Padding(
@@ -102,8 +117,8 @@ class _HelpersScreenState extends State<HelpersScreen> {
                                         : Container(),
                                   ],
                                 );
-                        },
-                      ),
+                              },
+                            ),
                     );
                   } else if (snapshot.hasError) {
                     return const Center(
@@ -126,7 +141,7 @@ class _HelpersScreenState extends State<HelpersScreen> {
   }
 }
 
-class HelperTile extends StatelessWidget {
+class HelperTile extends StatefulWidget {
   const HelperTile(
       {super.key,
       this.isUserHelper,
@@ -137,7 +152,9 @@ class HelperTile extends StatelessWidget {
       required this.helperUid,
       required this.userModel,
       required this.firebaseUser,
-      this.profilepic});
+      this.profilepic,
+      required this.helpId});
+
   final UserModel userModel;
   final User firebaseUser;
   final bool? isUserHelper;
@@ -147,6 +164,24 @@ class HelperTile extends StatelessWidget {
   final String? profilepic;
   final String? note;
   final String? avilableon;
+  final String helpId;
+
+  @override
+  State<HelperTile> createState() => _HelperTileState();
+}
+
+class _HelperTileState extends State<HelperTile> {
+  void deletehelp() async {
+    FirebaseFirestore.instance
+        .collection("College")
+        .doc(widget.userModel.college)
+        .collection("requests")
+        .doc(widget.helpId)
+        .delete()
+        .then((value) {
+      Navigator.pop(context);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -163,7 +198,7 @@ class HelperTile extends StatelessWidget {
               // Avatar , about and options
               CircleAvatar(
                 radius: 20,
-                backgroundImage: NetworkImage(profilepic ?? ""),
+                backgroundImage: NetworkImage(widget.profilepic ?? ""),
               ),
               const SizedBox(
                 width: 7,
@@ -172,14 +207,16 @@ class HelperTile extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    helperName ?? "NA:(",
+                    widget.helperName ?? "NA:(",
                     style: TextStyle(
                       fontWeight: FontWeight.w500,
                       fontSize: 14,
                     ),
                   ),
                   Text(
-                    requestedon != null ? timeago.format(requestedon) : "NA :(",
+                    widget.requestedon != null
+                        ? timeago.format(widget.requestedon)
+                        : "NA :(",
                     style: TextStyle(
                       color: Colors.grey,
                       fontSize: 9,
@@ -187,13 +224,60 @@ class HelperTile extends StatelessWidget {
                   ),
                 ],
               ),
+              const Spacer(),
+              IconButton(
+                onPressed: () {
+                  //
+                  showModalBottomSheet(
+                    context: context,
+                    backgroundColor: Colors.transparent,
+                    builder: (context) => CustomBottomSheet(
+                      height: size.height * 0.2,
+                      childern: widget.helperUid == widget.userModel.uid
+                          ? [
+                              BottomSheetItems(
+                                onTap: () async {
+                                  //
+                                },
+                                title: "Share",
+                              ),
+                              BottomSheetItems(
+                                onTap: () async {
+                                  showConfirmationDialog(
+                                      context: context,
+                                      message:
+                                          "Are you sure you want to delete this request?",
+                                      onPress: () {
+                                        deletehelp();
+                                      });
+                                },
+                                title: "Delete",
+                              ),
+                            ]
+                          : [
+                              BottomSheetItems(
+                                onTap: () {
+                                  //
+                                },
+                                title: "Share",
+                              ),
+                            ],
+                    ),
+                  );
+                },
+                icon: Icon(
+                  Icons.more_vert,
+                  size: 21,
+                  color: Colors.black.withOpacity(0.6),
+                ),
+              )
             ],
           ),
-          note != "" // if any note attached
+          widget.note != "" // if any note attached
               ? Padding(
                   padding: const EdgeInsets.only(top: 8.0),
                   child: ExpandableText(
-                    note ?? "",
+                    widget.note ?? "",
                     style: TextStyle(fontSize: 13),
                     expandText: "more",
                     collapseText: "show less",
@@ -224,22 +308,22 @@ class HelperTile extends StatelessWidget {
                           "Available on:",
                           style: TextStyle(fontSize: 11),
                         ),
-                        Text(avilableon ?? "NA:("),
+                        Text(widget.avilableon ?? "NA:("),
                       ],
                     ),
                   ),
                 ),
-                helperUid != userModel.uid
+                widget.helperUid != widget.userModel.uid
                     ? Flexible(
                         child: SlideAction(
                           onSubmit: () {
                             Navigator.push(context,
                                 MaterialPageRoute(builder: (context) {
                               return RequestForm(
-                                userModel: userModel,
-                                firebaseUser: firebaseUser,
+                                userModel: widget.userModel,
+                                firebaseUser: widget.firebaseUser,
                                 isitPersonalised: true,
-                                helperUid: helperUid ?? "",
+                                helperUid: widget.helperUid ?? "",
                               );
                             }));
                           },
