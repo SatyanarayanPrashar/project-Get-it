@@ -13,6 +13,7 @@ import 'package:get_it/models/comment.dart';
 import 'package:get_it/models/localStorage.dart';
 import 'package:get_it/models/requestModel.dart';
 import 'package:get_it/models/userModel.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:slide_to_act/slide_to_act.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
@@ -203,7 +204,9 @@ class _RequestTileState extends State<RequestTile> {
                                   ? [
                                       BottomSheetItems(
                                         onTap: () async {
-                                          //
+                                          Navigator.pop(context);
+                                          Share.share(
+                                              "Check out this Request on Getit!\n-----link to playstore-----");
                                         },
                                         title: "Share",
                                       ),
@@ -225,7 +228,9 @@ class _RequestTileState extends State<RequestTile> {
                                   : [
                                       BottomSheetItems(
                                         onTap: () {
-                                          //
+                                          Navigator.pop(context);
+                                          Share.share(
+                                              "Check out this Request on Getit!\n-----link to playstore-----");
                                         },
                                         title: "Share",
                                       ),

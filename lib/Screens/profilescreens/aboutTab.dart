@@ -286,12 +286,21 @@ class _AboutTabState extends State<AboutTab> {
                                         size: size.width * 0.12),
                                   ),
                           )
-                        : CircleAvatar(
-                            radius: size.width * 0.15,
-                            backgroundColor:
-                                const Color.fromARGB(255, 177, 220, 255),
-                            child: Icon(Icons.person, size: size.width * 0.12),
-                          )
+                        : widget.userModel.profilepic != ""
+                            ? CircleAvatar(
+                                radius: size.width * 0.15,
+                                backgroundImage: NetworkImage(
+                                    widget.userModel.profilepic ?? ""),
+                                backgroundColor:
+                                    const Color.fromARGB(255, 177, 220, 255),
+                              )
+                            : CircleAvatar(
+                                radius: size.width * 0.15,
+                                backgroundColor:
+                                    const Color.fromARGB(255, 177, 220, 255),
+                                child:
+                                    Icon(Icons.person, size: size.width * 0.12),
+                              )
                     : InkWell(
                         onTap: () async {
                           PermissionStatus storageStatus =
