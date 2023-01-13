@@ -12,7 +12,6 @@ import 'package:get_it/models/chatRoomModel.dart';
 import 'package:get_it/models/comment.dart';
 import 'package:get_it/models/firebaseHelper.dart';
 import 'package:get_it/models/localStorage.dart';
-import 'package:get_it/models/messageModel.dart';
 import 'package:get_it/models/requestModel.dart';
 import 'package:get_it/models/userModel.dart';
 import 'package:get_it/services/firebaseRequestServices.dart';

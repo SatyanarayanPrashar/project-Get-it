@@ -1,6 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:get_it/common/actionmessage.dart';
 import 'package:get_it/common/commonTextField.dart';
 import 'package:get_it/models/userModel.dart';
 import 'package:get_it/services/firebaseRequestServices.dart';
@@ -98,7 +97,7 @@ class _RequestFormState extends State<RequestForm> {
                     padding: const EdgeInsets.only(left: 11),
                     child: commonTextField(
                       inputcontroller: onequantitycontroller,
-                      title: "Quatity:",
+                      title: "Quantity:",
                       hint: "quantity",
                       length: size.width * 0.3,
                       enableToolTip: true,
